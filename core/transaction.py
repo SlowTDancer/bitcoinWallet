@@ -14,19 +14,19 @@ class Transaction:
     amount: float = 0.0
 
     def get_key(self) -> UUID:
-        pass
+        return self.key
 
     def get_to_key(self) -> UUID:
-        pass
+        return self.to_key
 
     def get_private_key(self) -> UUID:
-        pass
+        return self.private_key
 
     def get_from_key(self) -> UUID:
-        pass
+        return self.from_key
 
     def get_amount(self) -> float:
-        pass
+        return self.amount
 
 
 class TransactionRepository(RepositoryABC[Transaction]):
