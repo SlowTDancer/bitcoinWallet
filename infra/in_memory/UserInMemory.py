@@ -17,11 +17,10 @@ class UserInMemory(RepositoryABC[User]):
 
     @abstractmethod
     def create(self, user: User) -> None:
-        if self._get_by_email(user.email) is None:
-            self.users[user.get_private_key()] = user
-            return
+        if self._get_by_email(user.email) is not None:
+            raise UserAlreadyExistsError()
 
-        raise UserAlreadyExistsError()
+        self.users[user.get_private_key()] = user
 
     @abstractmethod
     def get(self, user_key: UUID) -> User:
