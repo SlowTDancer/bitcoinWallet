@@ -14,22 +14,25 @@ class Wallet:
     transactions: dict[UUID, Transaction] = field(default_factory=dict)
 
     def get_public_key(self) -> UUID:
-        pass
+        return self.public_key
 
     def get_private_key(self) -> UUID:
-        pass
+        return self.private_key
 
     def get_balance(self) -> float:
-        pass
+        return self.balance
 
     def get_transactions(self) -> list[Transaction]:
-        pass
+        if len(self.transactions) == 0:
+            return []
+        return list(self.transactions.values())
 
-    def deposit(self, amount: float) -> None:
-        pass
+    def update_balance(self, amount: float) -> None:
+        self.balance += amount
 
-    def withdraw(self, amount: float) -> None:
-        pass
+    def add_transaction(self, transaction: Transaction) -> None:
+        transaction_id = transaction.get_key()
+        self.transactions[transaction_id] = transaction
 
 
 class WalletRepository(RepositoryABC[Wallet]):
@@ -42,7 +45,7 @@ class WalletRepository(RepositoryABC[Wallet]):
         pass
 
     @abstractmethod
-    def add_transaction(self, wallet_key: UUID, transaction: Transaction) -> None:
+    def add_transaction(self, transaction: Transaction) -> None:
         pass
 
     @abstractmethod
