@@ -7,21 +7,21 @@ from core.repositories import RepositoryABC
 
 @dataclass
 class User:
+    email: str
     private_key: UUID = field(default_factory=uuid4)
-    mail: str = "default@mail.com"
     wallets: list[UUID] = field(default_factory=list)
 
     def get_private_key(self) -> UUID:
-        pass
+        return self.private_key
 
-    def get_mail(self) -> str:
-        pass
+    def get_email(self) -> str:
+        return self.email
 
     def get_wallets(self) -> list[UUID]:
-        pass
+        return self.wallets
 
     def add_wallet(self, wallet_key: UUID) -> None:
-        pass
+        self.wallets.append(wallet_key)
 
 
 class UserRepository(RepositoryABC[User]):
@@ -30,7 +30,11 @@ class UserRepository(RepositoryABC[User]):
         pass
 
     @abstractmethod
-    def get(self, user_key: UUID) -> User:
+    def get(self, private_key: UUID) -> User:
+        pass
+
+    @abstractmethod
+    def _get_by_email(self, email: str) -> User | None:
         pass
 
     @abstractmethod
