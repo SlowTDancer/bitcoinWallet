@@ -1,3 +1,7 @@
+class TransactionDoesNotExistError(Exception):
+    pass
+  
+  
 class WalletDoesNotExistError(Exception):
     pass
 
