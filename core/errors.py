@@ -32,3 +32,7 @@ class NotEnoughBalanceError(Exception):
 
 class SameWalletsError(Exception):
     pass
+
+
+class WalletLimitReachedError(Exception):
+    pass

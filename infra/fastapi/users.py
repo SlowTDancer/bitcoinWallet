@@ -27,6 +27,17 @@ class RegisterUserResponseEnvelope(BaseModel):
     "/users",
     status_code=201,
     response_model=RegisterUserResponseEnvelope,
+    responses={
+        409: {
+            "content": {
+                "application/json": {
+                    "example": {
+                        "error": {"error": {"message": "user with email: <email> already exists."}}
+                    }
+                }
+            }
+        }
+    }
 )
 def register_user(
     request: RegisterUserRequest, users: UserRepositoryDependable
