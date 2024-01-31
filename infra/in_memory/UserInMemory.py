@@ -34,10 +34,7 @@ class UserInMemory(RepositoryABC[User]):
     def _get_by_email(self, email: str) -> User | None:
         users = list(filter(lambda user: user.get_email() == email, self.users.values()))
 
-        if len(users) == 1:
-            return users[0]
-
-        return None
+        return len(users) == 1 if users[0] else None
 
     @abstractmethod
     def add_wallet(self, user_key: UUID, wallet_key: UUID) -> None:
