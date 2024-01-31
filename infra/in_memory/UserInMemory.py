@@ -6,7 +6,8 @@ from constants import MAX_WALLETS_PER_USER
 from core.errors import (
     UserAlreadyExistsError,
     UserDoesNotExistError,
-    WalletAlreadyExistsError, WalletLimitReachedError,
+    WalletAlreadyExistsError,
+    WalletLimitReachedError,
 )
 from core.repositories import RepositoryABC
 from core.user import User
@@ -32,9 +33,11 @@ class UserInMemory(RepositoryABC[User]):
 
     @abstractmethod
     def _get_by_email(self, email: str) -> User | None:
-        users = list(filter(lambda user: user.get_email() == email, self.users.values()))
+        users = list(
+            filter(lambda user: user.get_email() == email, self.users.values())
+        )
 
-        return len(users) == 1 if users[0] else None
+        return users[0] if len(users) == 1 else None
 
     @abstractmethod
     def add_wallet(self, user_key: UUID, wallet_key: UUID) -> None:

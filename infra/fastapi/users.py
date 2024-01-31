@@ -32,12 +32,16 @@ class RegisterUserResponseEnvelope(BaseModel):
             "content": {
                 "application/json": {
                     "example": {
-                        "error": {"error": {"message": "user with email: <email> already exists."}}
+                        "error": {
+                            "error": {
+                                "message": "user with email: <email> already exists."
+                            }
+                        }
                     }
                 }
             }
         }
-    }
+    },
 )
 def register_user(
     request: RegisterUserRequest, users: UserRepositoryDependable

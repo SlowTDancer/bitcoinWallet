@@ -12,12 +12,12 @@ class WalletAlreadyExistsError(Exception):
 
 class ConversionError(Exception):
     pass
-  
-  
+
+
 class TransactionDoesNotExistError(Exception):
     pass
-  
-  
+
+
 class WalletDoesNotExistError(Exception):
     pass
 

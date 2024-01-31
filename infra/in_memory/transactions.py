@@ -1,9 +1,9 @@
 from abc import abstractmethod
-from dataclasses import field, dataclass
+from dataclasses import dataclass, field
 from uuid import UUID
 
 from core.errors import TransactionDoesNotExistError
-from core.transaction import TransactionRepository, Transaction
+from core.transaction import Transaction, TransactionRepository
 
 
 @dataclass

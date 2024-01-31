@@ -1,9 +1,14 @@
 from dataclasses import field
 from uuid import UUID
 
-from core.errors import WalletDoesNotExistError, InvalidOwnerError, NotEnoughBalanceError, SameWalletsError
+from core.errors import (
+    InvalidOwnerError,
+    NotEnoughBalanceError,
+    SameWalletsError,
+    WalletDoesNotExistError,
+)
 from core.transaction import Transaction
-from core.wallet import WalletRepository, Wallet
+from core.wallet import Wallet, WalletRepository
 
 
 class WalletInMemory(WalletRepository):
@@ -37,7 +42,8 @@ class WalletInMemory(WalletRepository):
 
         from_wallet = self.get_wallet(from_user_id, from_wallet_id)
         to_wallet = self.get(to_wallet_id)
-        # todo the same user two wallets check goes in fastAPI function,it determines "amount"
+        # todo the same user two wallets check goes in
+        #  fastAPI function,it determines "amount"
         if from_wallet.get_balance() < transaction.get_amount():
             raise NotEnoughBalanceError(from_wallet_id)
         else:
