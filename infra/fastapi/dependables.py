@@ -20,10 +20,8 @@ def get_user_repository(request: Request) -> UserRepository:
     return request.app.state.users  # type: ignore
 
 
-TransactionRepositoryDependable = Annotated[TransactionRepository, Depends(get_transaction_repository)]
-WalletRepositoryDependable = Annotated[
-    WalletRepository, Depends(get_wallet_repository)
+TransactionRepositoryDependable = Annotated[
+    TransactionRepository, Depends(get_transaction_repository)
 ]
-UserRepositoryDependable = Annotated[
-    UserRepository, Depends(get_user_repository)
-]
+WalletRepositoryDependable = Annotated[WalletRepository, Depends(get_wallet_repository)]
+UserRepositoryDependable = Annotated[UserRepository, Depends(get_user_repository)]
