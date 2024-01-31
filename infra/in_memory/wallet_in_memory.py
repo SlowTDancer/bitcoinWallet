@@ -37,7 +37,6 @@ class WalletInMemory(WalletRepository):
 
         from_wallet = self.get_wallet(from_user_id, from_wallet_id)
         to_wallet = self.get(to_wallet_id)
-        # todo the same user two wallets check goes in fastAPI function,it determines "amount"
         if from_wallet.get_balance() < transaction.get_amount():
             raise NotEnoughBalanceError(from_wallet_id)
         else:
@@ -47,5 +46,5 @@ class WalletInMemory(WalletRepository):
             from_wallet.add_transaction(transaction)
             to_wallet.add_transaction(transaction)
 
-    def get_transactions(self, wallet_key: UUID) -> list[Transaction]:
-        return self.get(wallet_key).get_transactions()
+    def get_transactions(self, user_key: UUID, wallet_key: UUID) -> list[Transaction]:
+        return self.get_wallet(user_key, wallet_key).get_transactions()

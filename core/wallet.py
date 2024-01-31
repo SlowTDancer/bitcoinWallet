@@ -53,5 +53,5 @@ class WalletRepository(RepositoryABC[Wallet]):
         pass
 
     @abstractmethod
-    def get_transactions(self, wallet_key: UUID) -> list[Transaction]:
+    def get_transactions(self, user_key: UUID, wallet_key: UUID) -> list[Transaction]:
         pass
