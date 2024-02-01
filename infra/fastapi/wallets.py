@@ -101,7 +101,7 @@ def create_wallet(
         )
 
     try:
-        users.add_wallet(request.private_key, wallet)
+        users.add_wallet(request.private_key, wallet.get_public_key())
         wallets.create(wallet)
         btc_balance = wallet.get_balance()
         usd_balance = get_btc_to_usd_rate() * btc_balance
