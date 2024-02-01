@@ -53,5 +53,5 @@ class WalletInMemory(WalletRepository):
             from_wallet.add_transaction(transaction)
             to_wallet.add_transaction(transaction)
 
-    def get_transactions(self, wallet_key: UUID) -> list[Transaction]:
-        return self.get(wallet_key).get_transactions()
+    def get_transactions(self, user_key: UUID, wallet_key: UUID) -> list[Transaction]:
+        return self.get_wallet(user_key, wallet_key).get_transactions()
