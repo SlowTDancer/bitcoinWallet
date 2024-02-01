@@ -2,7 +2,12 @@ from uuid import UUID, uuid4
 
 import pytest
 
-from core.errors import UserDoesNotExistError, UserAlreadyExistsError, WalletAlreadyExistsError, WalletLimitReachedError
+from core.errors import (
+    UserAlreadyExistsError,
+    UserDoesNotExistError,
+    WalletAlreadyExistsError,
+    WalletLimitReachedError,
+)
 from core.user import User
 from infra.in_memory.user_in_memory import UserInMemory
 

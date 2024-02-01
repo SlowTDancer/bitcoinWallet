@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import Any
 from uuid import UUID
 
@@ -5,11 +7,19 @@ from fastapi import APIRouter
 from pydantic import BaseModel
 from starlette.responses import JSONResponse
 
-from core.errors import UserDoesNotExistError, ConversionError, WalletDoesNotExistError, InvalidOwnerError, \
-    WalletLimitReachedError
-from core.wallet import Wallet
-from infra.fastapi.dependables import WalletRepositoryDependable, UserRepositoryDependable
 from core.converter import get_btc_to_usd_rate
+from core.errors import (
+    ConversionError,
+    InvalidOwnerError,
+    UserDoesNotExistError,
+    WalletDoesNotExistError,
+    WalletLimitReachedError,
+)
+from core.wallet import Wallet
+from infra.fastapi.dependables import (
+    UserRepositoryDependable,
+    WalletRepositoryDependable,
+)
 
 wallet_api = APIRouter(tags=["Wallets"])
 
@@ -50,9 +60,7 @@ class WalletItemResponseEnvelope(BaseModel):
         404: {
             "content": {
                 "application/json": {
-                    "example": {
-                        "error": {"message": "User does not exist."}
-                    }
+                    "example": {"error": {"message": "User does not exist."}}
                 }
             }
         },
@@ -60,7 +68,9 @@ class WalletItemResponseEnvelope(BaseModel):
             "content": {
                 "application/json": {
                     "example": {
-                        "error": {"message": "User's with email <email> wallet quantity limit is reached."}
+                        "error": {
+                            "message": "User's with email <email> wallet quantity limit is reached."
+                        }
                     }
                 }
             }
@@ -73,23 +83,21 @@ class WalletItemResponseEnvelope(BaseModel):
                     }
                 }
             }
-        }
+        },
     },
 )
-def create_wallet(request: UserAPIForWalletRequest, wallets: WalletRepositoryDependable,
-                  users: UserRepositoryDependable) -> \
-        dict[str, Any] | JSONResponse:
+def create_wallet(
+    request: UserAPIForWalletRequest,
+    wallets: WalletRepositoryDependable,
+    users: UserRepositoryDependable,
+) -> dict[str, Any] | JSONResponse:
     wallet = Wallet(private_key=request.private_key)
     try:
         user = users.get(request.private_key)
     except UserDoesNotExistError:
         return JSONResponse(
             status_code=404,
-            content={
-                "error": {
-                    "message": "User does not exist."
-                }
-            },
+            content={"error": {"message": "User does not exist."}},
         )
 
     try:
@@ -97,8 +105,11 @@ def create_wallet(request: UserAPIForWalletRequest, wallets: WalletRepositoryDep
         wallets.create(wallet)
         btc_balance = wallet.get_balance()
         usd_balance = get_btc_to_usd_rate() * btc_balance
-        response = WalletItemResponse(public_key=wallet.get_public_key(), btc_balance=btc_balance,
-                                      usd_balance=usd_balance)
+        response = WalletItemResponse(
+            public_key=wallet.get_public_key(),
+            btc_balance=btc_balance,
+            usd_balance=usd_balance,
+        )
         return {"wallet": response}
     except WalletLimitReachedError:
         return JSONResponse(
@@ -112,82 +123,79 @@ def create_wallet(request: UserAPIForWalletRequest, wallets: WalletRepositoryDep
     except ConversionError:
         return JSONResponse(
             status_code=415,
-            content={
-                "error": {
-                    "message": "conversion of btc to usd failed."
-                }
-            },
+            content={"error": {"message": "conversion of btc to usd failed."}},
         )
 
 
-@wallet_api.get("/wallets/{address}",
-                status_code=200,
-                response_model=WalletItemResponseEnvelope,
-                responses={
-                    404: {
-                        "content": {
-                            "application/json": {
-                                "example": {
-                                    "error": {"message": "User does not exist."}
-                                }
-                            }
+@wallet_api.get(
+    "/wallets/{address}",
+    status_code=200,
+    response_model=WalletItemResponseEnvelope,
+    responses={
+        404: {
+            "content": {
+                "application/json": {
+                    "example": {"error": {"message": "User does not exist."}}
+                }
+            }
+        },
+        405: {
+            "content": {
+                "application/json": {
+                    "example": {
+                        "error": {"Wallet with address <address> does not exist."}
+                    }
+                }
+            }
+        },
+        409: {
+            "content": {
+                "application/json": {
+                    "example": {
+                        "error": {
+                            "message": "Wallet with address <address> does not belong to the correct owner."
                         }
-                    },
-                    405: {
-                        "content": {
-                            "application/json": {
-                                "example": {
-                                    "error": {"Wallet with address <address> does not exist."}
-                                }
-                            }
-                        }
-                    },
-                    409: {
-                        "content": {
-                            "application/json": {
-                                "example": {
-                                    "error": {
-                                        "message": "Wallet with address <address> does not belong to the correct owner."}
-                                }
-                            }
-                        }
-                    },
-                    415: {
-                        "content": {
-                            "application/json": {
-                                "example": {
-                                    "error": {"message": "conversion of btc to usd failed."}
-                                }
-                            }
-                        }
-                    }},
-                )
-def get_wallet_by_address(address: UUID, request: UserAPIForWalletRequest, wallets: WalletRepositoryDependable,
-                          users: UserRepositoryDependable) -> dict[str, Any] | JSONResponse:
+                    }
+                }
+            }
+        },
+        415: {
+            "content": {
+                "application/json": {
+                    "example": {
+                        "error": {"message": "conversion of btc to usd failed."}
+                    }
+                }
+            }
+        },
+    },
+)
+def get_wallet_by_address(
+    address: UUID,
+    request: UserAPIForWalletRequest,
+    wallets: WalletRepositoryDependable,
+    users: UserRepositoryDependable,
+) -> dict[str, Any] | JSONResponse:
     try:
         users.get(request.private_key)
     except UserDoesNotExistError:
         return JSONResponse(
             status_code=404,
-            content={
-                "error": {
-                    "message": "User does not exist."
-                }
-            },
+            content={"error": {"message": "User does not exist."}},
         )
     try:
         wallet = wallets.get_wallet(request.private_key, address)
         btc_balance = wallet.get_balance()
         usd_balance = get_btc_to_usd_rate() * btc_balance
-        response = WalletItemResponse(public_key=address, btc_balance=btc_balance, usd_balance=usd_balance)
+        response = WalletItemResponse(
+            public_key=address, btc_balance=btc_balance, usd_balance=usd_balance
+        )
         return {"wallet": response}
     except WalletDoesNotExistError:
         return JSONResponse(
             status_code=405,
             content={
-                "error": {
-                    "message": f"Wallet with address <{address}> does not exist."
-                }
+                "error": {"message": f"Wallet with address <{address}> does not exist."}
             },
         )
     except InvalidOwnerError:
@@ -202,72 +210,74 @@ def get_wallet_by_address(address: UUID, request: UserAPIForWalletRequest, walle
     except ConversionError:
         return JSONResponse(
             status_code=415,
-            content={
-                "error": {
-                    "message": "conversion of btc to usd failed."
-                }
-            },
+            content={"error": {"message": "conversion of btc to usd failed."}},
         )
 
 
-@wallet_api.get("/wallets/{address}/transactions",
-                status_code=200,
-                response_model=TransactionListResponseEnvelope,
-                responses={
-                    404: {
-                        "content": {
-                            "application/json": {
-                                "example": {
-                                    "error": {"message": "User does not exist."}
-                                }
-                            }
+@wallet_api.get(
+    "/wallets/{address}/transactions",
+    status_code=200,
+    response_model=TransactionListResponseEnvelope,
+    responses={
+        404: {
+            "content": {
+                "application/json": {
+                    "example": {"error": {"message": "User does not exist."}}
+                }
+            }
+        },
+        405: {
+            "content": {
+                "application/json": {
+                    "example": {
+                        "error": {"Wallet with address <address> does not exist."}
+                    }
+                }
+            }
+        },
+        409: {
+            "content": {
+                "application/json": {
+                    "example": {
+                        "error": {
+                            "message": "Wallet with address <address> does not belong to the correct owner."
                         }
-                    },
-                    405: {
-                        "content": {
-                            "application/json": {
-                                "example": {
-                                    "error": {"Wallet with address <address> does not exist."}
-                                }
-                            }
-                        }
-                    },
-                    409: {
-                        "content": {
-                            "application/json": {
-                                "example": {
-                                    "error": {
-                                        "message": "Wallet with address <address> does not belong to the correct owner."}
-                                }
-                            }
-                        }
-                    }},
-                )
-def get_wallet_transactions(address: UUID, request: UserAPIForWalletRequest, wallets: WalletRepositoryDependable,
-                            users: UserRepositoryDependable) -> dict[str, Any] | JSONResponse:
+                    }
+                }
+            }
+        },
+    },
+)
+def get_wallet_transactions(
+    address: UUID,
+    request: UserAPIForWalletRequest,
+    wallets: WalletRepositoryDependable,
+    users: UserRepositoryDependable,
+) -> dict[str, Any] | JSONResponse:
     try:
         users.get(request.private_key)
     except UserDoesNotExistError:
         return JSONResponse(
             status_code=404,
-            content={
-                "error": {
-                    "message": "User does not exist."
-                }
-            },
+            content={"error": {"message": "User does not exist."}},
         )
     try:
         transactions = wallets.get_transactions(request.private_key, address)
-        return {"transactions": [
-            TransactionItemResponse(to_key=transaction.get_to_key(), from_key=transaction.get_from_key(),
-                                    amount=transaction.get_amount()) for transaction in transactions]}
+        return {
+            "transactions": [
+                TransactionItemResponse(
+                    to_key=transaction.get_to_key(),
+                    from_key=transaction.get_from_key(),
+                    amount=transaction.get_amount(),
+                )
+                for transaction in transactions
+            ]
+        }
     except WalletDoesNotExistError:
         return JSONResponse(
             status_code=405,
             content={
-                "error": {
-                    "message": f"Wallet with address <{address}> does not exist."
-                }
+                "error": {"message": f"Wallet with address <{address}> does not exist."}
             },
         )
     except InvalidOwnerError:

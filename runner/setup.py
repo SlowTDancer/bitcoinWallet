@@ -2,6 +2,10 @@ import os
 
 from fastapi import FastAPI
 
+from infra.in_memory.transaction_in_memory import TransactionInMemory
+from infra.in_memory.user_in_memory import UserInMemory
+from infra.in_memory.wallet_in_memory import WalletInMemory
+
 
 def init_app() -> FastAPI:
     app = FastAPI()
