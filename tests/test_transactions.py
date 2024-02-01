@@ -1,4 +1,4 @@
-from uuid import uuid4, UUID
+from uuid import UUID, uuid4
 
 import pytest
 
@@ -12,7 +12,9 @@ def test_transaction_create() -> None:
     from_key = uuid4()
     private_key = uuid4()
     amount = 2.6
-    transaction = Transaction(from_key=from_key, to_key=to_key, amount=amount, private_key=private_key)
+    transaction = Transaction(
+        from_key=from_key, to_key=to_key, amount=amount, private_key=private_key
+    )
     assert isinstance(transaction.get_key(), UUID)
     assert isinstance(transaction.get_amount(), float)
     assert isinstance(transaction.get_private_key(), UUID)
@@ -25,7 +27,9 @@ def test_transaction_get() -> None:
     from_key = uuid4()
     private_key = uuid4()
     amount = 3.1
-    transaction = Transaction(from_key=from_key, to_key=to_key, amount=amount, private_key=private_key)
+    transaction = Transaction(
+        from_key=from_key, to_key=to_key, amount=amount, private_key=private_key
+    )
     assert transaction.get_private_key() == private_key
     assert transaction.get_amount() == amount
     assert transaction.get_from_key() == from_key
@@ -36,7 +40,9 @@ def test_transaction_get() -> None:
 def test_transaction_in_memory() -> None:
     repo = TransactionInMemory()
     none_existent_transaction_id = uuid4()
-    with pytest.raises(TransactionDoesNotExistError, match=str(none_existent_transaction_id)):
+    with pytest.raises(
+        TransactionDoesNotExistError, match=str(none_existent_transaction_id)
+    ):
         repo.get(none_existent_transaction_id)
 
     transaction1 = Transaction()
