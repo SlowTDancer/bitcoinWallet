@@ -4,7 +4,7 @@ import pytest
 
 from core.errors import TransactionDoesNotExistError
 from core.transaction import Transaction
-from infra.in_memory.transactions import TransactionInMemory
+from infra.in_memory.transaction_in_memory import TransactionInMemory
 
 
 def test_transaction_create() -> None:
