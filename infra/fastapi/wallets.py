@@ -5,7 +5,8 @@ from fastapi import APIRouter
 from pydantic import BaseModel
 from starlette.responses import JSONResponse
 
-from core.errors import UserDoesNotExistError, ConversionError, WalletDoesNotExistError, InvalidOwnerError
+from core.errors import UserDoesNotExistError, ConversionError, WalletDoesNotExistError, InvalidOwnerError, \
+    WalletLimitReachedError
 from core.wallet import Wallet
 from infra.fastapi.dependables import WalletRepositoryDependable, UserRepositoryDependable
 from core.converter import get_btc_to_usd_rate

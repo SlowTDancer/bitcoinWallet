@@ -2,7 +2,7 @@ from uuid import UUID, uuid4
 
 import pytest
 
-from core.errors import UserDoesNotExistError, UserAlreadyExistsError, WalletAlreadyExistsError
+from core.errors import UserDoesNotExistError, UserAlreadyExistsError, WalletAlreadyExistsError, WalletLimitReachedError
 from core.user import User
 from infra.in_memory.user_in_memory import UserInMemory
 
@@ -56,7 +56,7 @@ def test_user_add_no_more_than_three_wallets() -> None:
     user.add_wallet(public_key3)
     assert len(user.get_wallets()) == 3
 
-    with pytest.raises(UserDoesNotExistError, match=str(email)):
+    with pytest.raises(WalletLimitReachedError, match=str(email)):
         user.add_wallet(public_key4)
     assert len(user.get_wallets()) == 3
 

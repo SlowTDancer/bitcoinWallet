@@ -1,4 +1,4 @@
-from dataclasses import field
+from dataclasses import field, dataclass
 from uuid import UUID
 
 from core.errors import (
@@ -11,6 +11,7 @@ from core.transaction import Transaction
 from core.wallet import Wallet, WalletRepository
 
 
+@dataclass
 class WalletInMemory(WalletRepository):
     wallets: dict[UUID, Wallet] = field(default_factory=dict)
 

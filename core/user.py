@@ -2,6 +2,8 @@ from abc import abstractmethod
 from dataclasses import dataclass, field
 from uuid import UUID, uuid4
 
+from constants import MAX_WALLETS_PER_USER
+from core.errors import WalletLimitReachedError
 from core.repositories import RepositoryABC
 
 
@@ -21,6 +23,8 @@ class User:
         return self.wallets
 
     def add_wallet(self, wallet_key: UUID) -> None:
+        if len(self.get_wallets()) >= MAX_WALLETS_PER_USER:
+            raise WalletLimitReachedError(self.get_email())
         self.wallets.append(wallet_key)
 
 
