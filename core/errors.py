@@ -12,12 +12,12 @@ class WalletAlreadyExistsError(Exception):
 
 class ConversionError(Exception):
     pass
-  
-  
+
+
 class TransactionDoesNotExistError(Exception):
     pass
-  
-  
+
+
 class WalletDoesNotExistError(Exception):
     pass
 
@@ -31,4 +31,8 @@ class NotEnoughBalanceError(Exception):
 
 
 class SameWalletsError(Exception):
+    pass
+
+
+class WalletLimitReachedError(Exception):
     pass
