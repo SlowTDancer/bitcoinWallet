@@ -1,5 +1,6 @@
 from abc import abstractmethod
 from dataclasses import dataclass, field
+from typing import Protocol
 from uuid import UUID, uuid4
 
 from constants import MAX_WALLETS_PER_USER
@@ -25,22 +26,19 @@ class User:
     def add_wallet(self, wallet_key: UUID) -> None:
         if len(self.get_wallets()) >= MAX_WALLETS_PER_USER:
             raise WalletLimitReachedError(self.get_email())
+
         self.wallets.append(wallet_key)
 
 
-class UserRepository(RepositoryABC[User]):
-    @abstractmethod
+class UserRepository(Protocol):
     def create(self, user: User) -> None:
         pass
 
-    @abstractmethod
     def get(self, private_key: UUID) -> User:
         pass
 
-    @abstractmethod
     def _get_by_email(self, email: str) -> User | None:
         pass
 
-    @abstractmethod
     def add_wallet(self, user_key: UUID, wallet_key: UUID) -> None:
         pass

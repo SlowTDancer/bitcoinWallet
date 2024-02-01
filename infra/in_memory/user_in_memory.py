@@ -13,7 +13,7 @@ from core.user import User
 
 
 @dataclass
-class UserInMemory(RepositoryABC[User]):
+class UserInMemory:
     users: dict[UUID, User] = field(default_factory=dict)
 
     def create(self, user: User) -> None:
