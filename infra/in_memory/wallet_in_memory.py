@@ -1,4 +1,4 @@
-from dataclasses import field
+from dataclasses import dataclass, field
 from uuid import UUID
 
 from core.errors import (
@@ -11,6 +11,7 @@ from core.transaction import Transaction
 from core.wallet import Wallet, WalletRepository
 
 
+@dataclass
 class WalletInMemory(WalletRepository):
     wallets: dict[UUID, Wallet] = field(default_factory=dict)
 
@@ -26,7 +27,7 @@ class WalletInMemory(WalletRepository):
     def get_wallet(self, user_key: UUID, wallet_key: UUID) -> Wallet:
         try:
             wallet = self.wallets[wallet_key]
-            if wallet.get_public_key() != user_key:
+            if wallet.get_private_key() != user_key:
                 raise InvalidOwnerError(user_key)
             else:
                 return wallet

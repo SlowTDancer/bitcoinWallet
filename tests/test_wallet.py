@@ -1,0 +1,163 @@
+from uuid import UUID, uuid4
+
+import pytest
+
+from core.errors import (
+    InvalidOwnerError,
+    NotEnoughBalanceError,
+    SameWalletsError,
+    WalletDoesNotExistError,
+)
+from core.transaction import Transaction
+from core.wallet import Wallet
+from infra.in_memory.wallet_in_memory import WalletInMemory
+
+
+def test_wallet_create() -> None:
+    wallet = Wallet()
+
+    assert isinstance(wallet.get_public_key(), UUID)
+    assert isinstance(wallet.get_private_key(), UUID)
+    assert isinstance(wallet.get_balance(), float)
+    assert isinstance(wallet.get_transactions(), list)
+
+
+def test_wallet_get() -> None:
+    public_key = uuid4()
+    private_key = uuid4()
+    balance = 2.4
+
+    wallet = Wallet(public_key, private_key, balance)
+
+    assert wallet.get_public_key() == public_key
+    assert wallet.get_private_key() == private_key
+    assert wallet.get_balance() == balance
+    assert wallet.get_transactions() == []
+
+
+def test_wallet_update_balance() -> None:
+    public_key = uuid4()
+    private_key = uuid4()
+    balance = 2.5
+
+    wallet = Wallet(public_key, private_key, balance)
+    add_amount = 4.0
+    wallet.update_balance(add_amount)
+    assert wallet.get_balance() == balance + add_amount
+
+
+def test_wallet_add_transaction() -> None:
+    public_key = uuid4()
+    private_key = uuid4()
+    balance = 2.5
+
+    wallet = Wallet(public_key, private_key, balance)
+    assert len(wallet.get_transactions()) == 0
+
+    transaction = Transaction()
+
+    wallet.add_transaction(transaction)
+
+    assert len(wallet.get_transactions()) == 1
+    assert wallet.get_transactions()[0] == transaction
+
+
+def test_wallet_in_memory_create_and_get() -> None:
+    repo = WalletInMemory()
+
+    wallet = Wallet()
+
+    repo.create(wallet)
+
+    assert repo.get(wallet.get_public_key()) == wallet
+
+
+def test_wallet_in_memory_should_not_get_unknown() -> None:
+    repo = WalletInMemory()
+    unknown_key = uuid4()
+
+    with pytest.raises(WalletDoesNotExistError, match=str(unknown_key)):
+        repo.get(unknown_key)
+
+
+def test_wallet_in_memory_get_wallet() -> None:
+    repo = WalletInMemory()
+
+    user_key = uuid4()
+    wallet = Wallet(private_key=user_key)
+
+    repo.create(wallet)
+
+    assert repo.get_wallet(user_key, wallet.get_public_key()) == wallet
+
+
+def test_wallet_in_memory_should_not_get_wallet_of_diff_user() -> None:
+    repo = WalletInMemory()
+
+    user_key = uuid4()
+    wallet = Wallet()
+
+    repo.create(wallet)
+
+    with pytest.raises(InvalidOwnerError, match=str(user_key)):
+        repo.get_wallet(user_key, wallet.get_public_key())
+
+
+def test_wallet_in_memory_should_not_get_unknown_wallet() -> None:
+    repo = WalletInMemory()
+    unknown_key = uuid4()
+    user_key = uuid4()
+
+    with pytest.raises(WalletDoesNotExistError, match=str(unknown_key)):
+        repo.get_wallet(user_key, unknown_key)
+
+
+def test_wallet_in_memory_should_not_transaction_to_same_wallet() -> None:
+    repo = WalletInMemory()
+
+    to_key = uuid4()
+    from_key = to_key
+    transaction = Transaction(to_key=to_key, from_key=from_key)
+
+    with pytest.raises(SameWalletsError, match=str(to_key)):
+        repo.add_transaction(transaction)
+
+
+def test_wallet_in_memory_should_not_transaction_more_than_balance() -> None:
+    repo = WalletInMemory()
+    wallet1 = Wallet()
+    wallet2 = Wallet()
+    repo.create(wallet1)
+    repo.create(wallet2)
+
+    transaction = Transaction(
+        private_key=wallet1.get_private_key(),
+        to_key=wallet2.get_public_key(),
+        from_key=wallet1.get_public_key(),
+        amount=3.0,
+    )
+
+    with pytest.raises(NotEnoughBalanceError, match=str(wallet1.get_public_key())):
+        repo.add_transaction(transaction)
+
+
+def test_wallet_in_memory_add_and_get_transaction() -> None:
+    repo = WalletInMemory()
+    wallet1 = Wallet(balance=5.0)
+    wallet2 = Wallet()
+    repo.create(wallet1)
+    repo.create(wallet2)
+
+    user_key = wallet1.get_private_key()
+    fr = wallet1.get_public_key()
+    fro = fr
+    from_key = fro
+    transaction = Transaction(
+        private_key=user_key,
+        to_key=wallet2.get_public_key(),
+        from_key=from_key,
+        amount=3.0,
+    )
+
+    repo.add_transaction(transaction)
+    assert repo.get_transactions(user_key, from_key) == [transaction]
