@@ -2,13 +2,15 @@ from uuid import UUID, uuid4
 
 import pytest
 
+from constants import TEST_DB_PATH
 from core.errors import (
     UserAlreadyExistsError,
     UserDoesNotExistError,
     WalletAlreadyExistsError,
     WalletLimitReachedError,
 )
-from core.user import User
+from core.user import User, UserRepository
+from infra.database.user_database import UserDatabase
 from infra.in_memory.user_in_memory import UserInMemory
 
 
@@ -66,8 +68,7 @@ def test_user_add_no_more_than_three_wallets() -> None:
     assert len(user.get_wallets()) == 3
 
 
-def test_user_in_memory_create_and_get() -> None:
-    repo = UserInMemory()
+def test_user_in_memory_create_and_get(repo: UserRepository = UserInMemory()) -> None:
     none_existent_user_id = uuid4()
     with pytest.raises(UserDoesNotExistError, match=str(none_existent_user_id)):
         repo.get(none_existent_user_id)
@@ -82,8 +83,7 @@ def test_user_in_memory_create_and_get() -> None:
         repo.create(user)
 
 
-def test_user_in_memory_add_wallet() -> None:
-    repo = UserInMemory()
+def test_user_in_memory_add_wallet(repo: UserRepository = UserInMemory()) -> None:
     none_existent_user_id = uuid4()
     with pytest.raises(UserDoesNotExistError, match=str(none_existent_user_id)):
         repo.add_wallet(none_existent_user_id, uuid4())
@@ -97,3 +97,15 @@ def test_user_in_memory_add_wallet() -> None:
 
     with pytest.raises(WalletAlreadyExistsError, match=str(wallet_key)):
         repo.add_wallet(user.get_private_key(), wallet_key)
+
+
+def test_user_database_create_and_get() -> None:
+    repo = UserDatabase(TEST_DB_PATH)
+    test_user_in_memory_create_and_get(repo)
+    repo.clear()
+
+
+def test_user_database_add_wallet() -> None:
+    repo = UserDatabase(TEST_DB_PATH)
+    test_user_in_memory_add_wallet(repo)
+    repo.clear()
