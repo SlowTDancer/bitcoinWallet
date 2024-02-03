@@ -29,14 +29,14 @@ class WalletSqlite(WalletRepository):
             "INSERT INTO wallets (public_key, private_key, balance) "
             "VALUES (?, ?, ?);",
             (
-                public_key,
-                private_key,
+                str(public_key),
+                str(private_key),
                 balance
             ),
         )
 
         for transaction in transactions:
-            cursor.execute("INSERT INTO wallets_tranasctions (wallet_key, transaction_key) "
+            cursor.execute("INSERT INTO wallets_tranasctions (str(wallet_key), str(transaction_key)) "
                            "VALUES (?, ?);", (public_key, transaction.get_key()))
 
         connection.commit()
@@ -50,7 +50,7 @@ class WalletSqlite(WalletRepository):
         cursor = connection.cursor()
 
         cursor.execute("SELECT private_key, balance FROM wallets"
-                       " WHERE key = ?", (str(wallet_key),))
+                       " WHERE public_key = ?", (str(wallet_key),))
         result = cursor.fetchone()
 
         if result is None:
@@ -60,8 +60,8 @@ class WalletSqlite(WalletRepository):
         private_key = UUID(result[0])
         balance = result[1]
 
-        cursor.execute("SELECT tranasction_key FROM wallets_transactions"
-                       " WHERE wallet_key = ?", (str(wallet_key)))
+        cursor.execute("SELECT transaction_key FROM wallets_transactions"
+                       " WHERE wallet_key = ?", (str(wallet_key),))
         result = cursor.fetchall()
         connection.close()
 
@@ -103,6 +103,8 @@ class WalletSqlite(WalletRepository):
 
             connection.commit()
             connection.close()
+
+        self.transactions.create(transaction)
 
     def get_wallet(self, user_key: UUID, wallet_key: UUID) -> Wallet:
         wallet = self.get(wallet_key)
