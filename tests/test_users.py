@@ -10,7 +10,7 @@ from core.errors import (
     WalletLimitReachedError,
 )
 from core.user import User, UserRepository
-from infra.database.user_database import UserDatabase
+from infra.sqlite.user_sqlite import UserSqlite
 from infra.in_memory.user_in_memory import UserInMemory
 
 
@@ -99,13 +99,13 @@ def test_user_in_memory_add_wallet(repo: UserRepository = UserInMemory()) -> Non
         repo.add_wallet(user.get_private_key(), wallet_key)
 
 
-def test_user_database_create_and_get() -> None:
-    repo = UserDatabase(TEST_DB_PATH)
+def test_user_sqlite_create_and_get() -> None:
+    repo = UserSqlite(TEST_DB_PATH)
     test_user_in_memory_create_and_get(repo)
     repo.clear()
 
 
-def test_user_database_add_wallet() -> None:
-    repo = UserDatabase(TEST_DB_PATH)
+def test_user_sqlite_add_wallet() -> None:
+    repo = UserSqlite(TEST_DB_PATH)
     test_user_in_memory_add_wallet(repo)
     repo.clear()
