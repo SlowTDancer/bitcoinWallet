@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import Any
 from uuid import UUID
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Header
 from pydantic import BaseModel
 from starlette.responses import JSONResponse
 
@@ -22,10 +22,6 @@ from infra.fastapi.dependables import (
 )
 
 wallet_api = APIRouter(tags=["Wallets"])
-
-
-class UserAPIForWalletRequest(BaseModel):
-    private_key: UUID
 
 
 class WalletItemResponse(BaseModel):
@@ -87,13 +83,13 @@ class WalletItemResponseEnvelope(BaseModel):
     },
 )
 def create_wallet(
-    request: UserAPIForWalletRequest,
     wallets: WalletRepositoryDependable,
     users: UserRepositoryDependable,
+    api_key: UUID = Header(alias="api_key"),
 ) -> dict[str, Any] | JSONResponse:
-    wallet = Wallet(private_key=request.private_key)
+    wallet = Wallet(private_key=api_key)
     try:
-        user = users.get(request.private_key)
+        user = users.get(api_key)
     except UserDoesNotExistError:
         return JSONResponse(
             status_code=404,
@@ -101,7 +97,7 @@ def create_wallet(
         )
 
     try:
-        users.add_wallet(request.private_key, wallet.get_public_key())
+        users.add_wallet(api_key, wallet.get_public_key())
         wallets.create(wallet)
         btc_balance = wallet.get_balance()
         usd_balance = get_btc_to_usd_rate() * btc_balance
@@ -172,19 +168,19 @@ def create_wallet(
 )
 def get_wallet_by_address(
     address: UUID,
-    request: UserAPIForWalletRequest,
     wallets: WalletRepositoryDependable,
     users: UserRepositoryDependable,
+    api_key: UUID = Header(alias="api_key"),
 ) -> dict[str, Any] | JSONResponse:
     try:
-        users.get(request.private_key)
+        users.get(api_key)
     except UserDoesNotExistError:
         return JSONResponse(
             status_code=404,
             content={"error": {"message": "User does not exist."}},
         )
     try:
-        wallet = wallets.get_wallet(request.private_key, address)
+        wallet = wallets.get_wallet(api_key, address)
         btc_balance = wallet.get_balance()
         usd_balance = get_btc_to_usd_rate() * btc_balance
         response = WalletItemResponse(
@@ -250,19 +246,19 @@ def get_wallet_by_address(
 )
 def get_wallet_transactions(
     address: UUID,
-    request: UserAPIForWalletRequest,
     wallets: WalletRepositoryDependable,
     users: UserRepositoryDependable,
+    api_key: UUID = Header(alias="api_key"),
 ) -> dict[str, Any] | JSONResponse:
     try:
-        users.get(request.private_key)
+        users.get(api_key)
     except UserDoesNotExistError:
         return JSONResponse(
             status_code=404,
             content={"error": {"message": "User does not exist."}},
         )
     try:
-        transactions = wallets.get_transactions(request.private_key, address)
+        transactions = wallets.get_transactions(api_key, address)
         return {
             "transactions": [
                 TransactionItemResponse(
