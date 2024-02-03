@@ -10,10 +10,10 @@ from core.errors import (
     InvalidOwnerError,
     NotEnoughBalanceError,
     SameWalletsError,
-    WalletDoesNotExistError,
+    WalletDoesNotExistError, UserDoesNotExistError,
 )
 from core.transaction import Transaction
-from infra.fastapi.dependables import WalletRepositoryDependable
+from infra.fastapi.dependables import WalletRepositoryDependable, UserRepositoryDependable
 from infra.fastapi.wallets import (
     TransactionItemResponse,
     TransactionItemResponseEnvelope,
@@ -163,60 +163,37 @@ def make_transaction(
     status_code=200,
     response_model=TransactionListResponseEnvelope,
     responses={
-        405: {
+        404: {
             "content": {
                 "application/json": {
-                    "example": {
-                        "error": {"Wallet with address <address> does not exist."}
-                    }
-                }
-            }
-        },
-        409: {
-            "content": {
-                "application/json": {
-                    "example": {
-                        "error": {
-                            "message": "Wallet with address <address> does not belong to the correct owner."
-                        }
-                    }
+                    "example": {"error": {"message": "User does not exist."}}
                 }
             }
         },
     },
 )
 def get_transactions(
-    wallet_id: UUID,
     wallets: WalletRepositoryDependable,
+    users: UserRepositoryDependable,
     API_key: UUID = Header(alias="API_key"),
 ) -> dict[str, list[TransactionItemResponse]] | JSONResponse:
     try:
-        transactions = wallets.get_transactions(API_key, wallet_id)
-        return {
-            "transactions": [
-                TransactionItemResponse(
-                    to_key=transaction.get_to_key(),
-                    from_key=transaction.get_from_key(),
-                    amount=transaction.get_amount(),
-                )
-                for transaction in transactions
-            ]
-        }
-    except WalletDoesNotExistError:
+        user = users.get(API_key)
+    except UserDoesNotExistError:
         return JSONResponse(
-            status_code=405,
-            content={
-                "error": {
-                    "message": f"Wallet with address <{wallet_id}> does not exist."
-                }
-            },
+            status_code=404,
+            content={"error": {"message": "User does not exist."}},
         )
-    except InvalidOwnerError:
-        return JSONResponse(
-            status_code=409,
-            content={
-                "error": {
-                    "message": f"Wallet with address <{wallet_id}> does not belong to the correct owner."
-                }
-            },
-        )
+
+    wallet_ids = user.get_wallets()
+    transactions = [wallets.get_transactions(API_key, wallet_id) for wallet_id in wallet_ids]
+    return {
+        "transactions": [
+            TransactionItemResponse(
+                to_key=trans.get_to_key(),
+                from_key=trans.get_from_key(),
+                amount=trans.get_amount(),
+            )
+            for transaction in transactions for trans in transaction
+        ]
+    }
