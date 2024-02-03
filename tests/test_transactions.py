@@ -2,8 +2,10 @@ from uuid import UUID, uuid4
 
 import pytest
 
+from constants import TEST_DB_PATH
 from core.errors import TransactionDoesNotExistError
-from core.transaction import Transaction
+from core.transaction import Transaction, TransactionRepository
+from infra.sqlite.transaction_sqlite import TransactionSqlite
 from infra.in_memory.transaction_in_memory import TransactionInMemory
 
 
@@ -37,11 +39,10 @@ def test_transaction_get() -> None:
     assert transaction.get_private_key() != uuid4()
 
 
-def test_transaction_in_memory() -> None:
-    repo = TransactionInMemory()
+def test_transaction_repository(repo: TransactionRepository = TransactionInMemory()) -> None:
     none_existent_transaction_id = uuid4()
     with pytest.raises(
-        TransactionDoesNotExistError, match=str(none_existent_transaction_id)
+            TransactionDoesNotExistError, match=str(none_existent_transaction_id)
     ):
         repo.get(none_existent_transaction_id)
 
@@ -52,3 +53,9 @@ def test_transaction_in_memory() -> None:
 
     assert transaction1 == repo.get(transaction1.get_key())
     assert transaction2 == repo.get(transaction2.get_key())
+
+
+def test_transaction_sqlite() -> None:
+    repo = TransactionSqlite(TEST_DB_PATH)
+    test_transaction_repository(repo)
+    repo.clear()
