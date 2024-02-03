@@ -55,7 +55,7 @@ def test_transaction_repository(repo: TransactionRepository = TransactionInMemor
     assert transaction2 == repo.get(transaction2.get_key())
 
 
-def test_transaction_database() -> None:
+def test_transaction_sqlite() -> None:
     repo = TransactionSqlite(TEST_DB_PATH)
     test_transaction_repository(repo)
     repo.clear()
