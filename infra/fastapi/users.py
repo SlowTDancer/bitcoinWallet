@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from uuid import UUID
 
 from fastapi import APIRouter
@@ -45,12 +47,12 @@ class RegisterUserResponseEnvelope(BaseModel):
 )
 def register_user(
     request: RegisterUserRequest, users: UserRepositoryDependable
-) -> dict[str, UUID] | JSONResponse:
+) -> dict[str, dict[str, UUID]] | JSONResponse:
     email = request.email
     user = User(email)
     try:
         users.create(user)
-        return {"Private Key": user.get_private_key()}
+        return {"user": {"private_key": user.get_private_key()}}
     except UserAlreadyExistsError:
         return JSONResponse(
             status_code=409,
