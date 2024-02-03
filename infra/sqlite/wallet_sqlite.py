@@ -3,9 +3,14 @@ from dataclasses import dataclass
 from uuid import UUID
 
 from constants import DB_PATH
-from core.errors import InvalidOwnerError, WalletDoesNotExistError, SameWalletsError, NotEnoughBalanceError
+from core.errors import (
+    InvalidOwnerError,
+    NotEnoughBalanceError,
+    SameWalletsError,
+    WalletDoesNotExistError,
+)
 from core.transaction import Transaction
-from core.wallet import WalletRepository, Wallet
+from core.wallet import Wallet, WalletRepository
 from infra.sqlite.transaction_sqlite import TransactionSqlite
 
 
@@ -28,16 +33,15 @@ class WalletSqlite(WalletRepository):
         cursor.execute(
             "INSERT INTO wallets (public_key, private_key, balance) "
             "VALUES (?, ?, ?);",
-            (
-                str(public_key),
-                str(private_key),
-                balance
-            ),
+            (str(public_key), str(private_key), balance),
         )
 
         for transaction in transactions:
-            cursor.execute("INSERT INTO wallets_transactions (wallet_key, transaction_key) "
-                           "VALUES (?, ?);", (str(public_key), str(transaction.get_key())))
+            cursor.execute(
+                "INSERT INTO wallets_transactions (wallet_key, transaction_key) "
+                "VALUES (?, ?);",
+                (str(public_key), str(transaction.get_key())),
+            )
 
         connection.commit()
         connection.close()
@@ -49,8 +53,10 @@ class WalletSqlite(WalletRepository):
         connection = sqlite3.connect(self.db_path)
         cursor = connection.cursor()
 
-        cursor.execute("SELECT private_key, balance FROM wallets"
-                       " WHERE public_key = ?", (str(wallet_key),))
+        cursor.execute(
+            "SELECT private_key, balance FROM wallets" " WHERE public_key = ?",
+            (str(wallet_key),),
+        )
         result = cursor.fetchone()
 
         if result is None:
@@ -60,8 +66,10 @@ class WalletSqlite(WalletRepository):
         private_key = UUID(result[0])
         balance = result[1]
 
-        cursor.execute("SELECT transaction_key FROM wallets_transactions"
-                       " WHERE wallet_key = ?", (str(wallet_key),))
+        cursor.execute(
+            "SELECT transaction_key FROM wallets_transactions" " WHERE wallet_key = ?",
+            (str(wallet_key),),
+        )
         result = cursor.fetchall()
         connection.close()
 
@@ -92,14 +100,24 @@ class WalletSqlite(WalletRepository):
             from_wallet_balance = from_wallet.get_balance()
             to_wallet_balance = to_wallet.get_balance()
 
-            cursor.execute("UPDATE wallets SET balance = ? WHERE public_key = ?",
-                           (from_wallet_balance - amount, str(from_wallet_id)))
-            cursor.execute("UPDATE wallets SET balance = ? WHERE public_key = ?",
-                           (to_wallet_balance + amount, str(to_wallet_id)))
-            cursor.execute("INSERT INTO wallets_transactions (wallet_key, transaction_key) "
-                           "VALUES (?, ?)", (str(from_wallet_id), str(transaction.get_key())))
-            cursor.execute("INSERT INTO wallets_transactions (wallet_key, transaction_key) "
-                           "VALUES (?, ?)", (str(to_wallet_id), str(transaction.get_key())))
+            cursor.execute(
+                "UPDATE wallets SET balance = ? WHERE public_key = ?",
+                (from_wallet_balance - amount, str(from_wallet_id)),
+            )
+            cursor.execute(
+                "UPDATE wallets SET balance = ? WHERE public_key = ?",
+                (to_wallet_balance + amount, str(to_wallet_id)),
+            )
+            cursor.execute(
+                "INSERT INTO wallets_transactions (wallet_key, transaction_key) "
+                "VALUES (?, ?)",
+                (str(from_wallet_id), str(transaction.get_key())),
+            )
+            cursor.execute(
+                "INSERT INTO wallets_transactions (wallet_key, transaction_key) "
+                "VALUES (?, ?)",
+                (str(to_wallet_id), str(transaction.get_key())),
+            )
 
             connection.commit()
             connection.close()

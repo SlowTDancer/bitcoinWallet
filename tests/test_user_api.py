@@ -11,7 +11,7 @@ def client() -> TestClient:
     return TestClient(init_app())
 
 
-def test_register_user_success(client: TestClient):
+def test_register_user_success(client: TestClient) -> None:
     email = "test@example.com"
     request_data = {"email": email}
 
@@ -21,7 +21,7 @@ def test_register_user_success(client: TestClient):
     assert response.json() == {"user": {"api_key": ANY}}
 
 
-def test_register_user_conflict(client: TestClient):
+def test_register_user_conflict(client: TestClient) -> None:
     email = "test@example.com"
     request_data = {"email": email}
 

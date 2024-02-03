@@ -4,8 +4,12 @@ from dataclasses import dataclass
 from uuid import UUID
 
 from constants import DB_PATH
-from core.errors import UserDoesNotExistError, UserAlreadyExistsError, WalletAlreadyExistsError
-from core.user import UserRepository, User
+from core.errors import (
+    UserAlreadyExistsError,
+    UserDoesNotExistError,
+    WalletAlreadyExistsError,
+)
+from core.user import User, UserRepository
 
 
 @dataclass
@@ -15,7 +19,9 @@ class UserSqlite(UserRepository):
     def create(self, user: User) -> None:
         connection = sqlite3.connect(self.db_path)
         cursor = connection.cursor()
-        cursor.execute("SELECT private_key FROM users WHERE email = ?", (user.get_email(),))
+        cursor.execute(
+            "SELECT private_key FROM users WHERE email = ?", (user.get_email(),)
+        )
         result = cursor.fetchone()
 
         if result is not None:
@@ -25,8 +31,7 @@ class UserSqlite(UserRepository):
         private_key = str(user.get_private_key())
 
         cursor.execute(
-            "INSERT INTO users (private_key, email) "
-            "VALUES (?, ?);",
+            "INSERT INTO users (private_key, email) " "VALUES (?, ?);",
             (
                 private_key,
                 email,
@@ -38,13 +43,18 @@ class UserSqlite(UserRepository):
     def get(self, private_key: UUID) -> User:
         connection = sqlite3.connect(self.db_path)
         cursor = connection.cursor()
-        cursor.execute("SELECT email FROM users WHERE private_key = ?", (str(private_key),))
+        cursor.execute(
+            "SELECT email FROM users WHERE private_key = ?", (str(private_key),)
+        )
         result = cursor.fetchone()
         if result is None:
             connection.close()
             raise UserDoesNotExistError(private_key)
         email = str(result[0])
-        cursor.execute("SELECT public_key FROM users_wallets WHERE private_key = ?", (str(private_key),))
+        cursor.execute(
+            "SELECT public_key FROM users_wallets WHERE private_key = ?",
+            (str(private_key),),
+        )
         result = cursor.fetchall()
         connection.close()
         if result is None:
@@ -61,7 +71,10 @@ class UserSqlite(UserRepository):
             connection.close()
             return None
         user_private_key = uuid.UUID(result[0])
-        cursor.execute("SELECT public_key FROM users_wallets WHERE private_key = ?", (str(user_private_key),))
+        cursor.execute(
+            "SELECT public_key FROM users_wallets WHERE private_key = ?",
+            (str(user_private_key),),
+        )
         result = cursor.fetchall()
         connection.close()
         if result is None:
@@ -76,12 +89,13 @@ class UserSqlite(UserRepository):
 
         connection = sqlite3.connect(self.db_path)
         cursor = connection.cursor()
-        cursor.execute("INSERT INTO users_wallets (private_key, public_key) "
-                       "VALUES (?, ?);",
-                       (
-                           str(user_key),
-                           str(wallet_key),
-                       ), )
+        cursor.execute(
+            "INSERT INTO users_wallets (private_key, public_key) " "VALUES (?, ?);",
+            (
+                str(user_key),
+                str(wallet_key),
+            ),
+        )
         connection.commit()
         connection.close()
 

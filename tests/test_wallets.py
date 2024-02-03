@@ -72,7 +72,9 @@ def test_wallet_repo_create_and_get(repo: WalletRepository = WalletInMemory()) -
     assert repo.get(wallet.get_public_key()) == wallet
 
 
-def test_wallet_repo_should_not_get_unknown(repo: WalletRepository = WalletInMemory()) -> None:
+def test_wallet_repo_should_not_get_unknown(
+    repo: WalletRepository = WalletInMemory(),
+) -> None:
     unknown_key = uuid4()
 
     with pytest.raises(WalletDoesNotExistError, match=str(unknown_key)):
@@ -88,7 +90,9 @@ def test_wallet_repo_get_wallet(repo: WalletRepository = WalletInMemory()) -> No
     assert repo.get_wallet(user_key, wallet.get_public_key()) == wallet
 
 
-def test_wallet_repo_should_not_get_wallet_of_diff_user(repo: WalletRepository = WalletInMemory()) -> None:
+def test_wallet_repo_should_not_get_wallet_of_diff_user(
+    repo: WalletRepository = WalletInMemory(),
+) -> None:
     user_key = uuid4()
     wallet = Wallet()
 
@@ -98,7 +102,9 @@ def test_wallet_repo_should_not_get_wallet_of_diff_user(repo: WalletRepository =
         repo.get_wallet(user_key, wallet.get_public_key())
 
 
-def test_wallet_repo_should_not_get_unknown_wallet(repo: WalletRepository = WalletInMemory()) -> None:
+def test_wallet_repo_should_not_get_unknown_wallet(
+    repo: WalletRepository = WalletInMemory(),
+) -> None:
     unknown_key = uuid4()
     user_key = uuid4()
 
@@ -106,7 +112,9 @@ def test_wallet_repo_should_not_get_unknown_wallet(repo: WalletRepository = Wall
         repo.get_wallet(user_key, unknown_key)
 
 
-def test_wallet_repo_should_not_transaction_to_same_wallet(repo: WalletRepository = WalletInMemory()) -> None:
+def test_wallet_repo_should_not_transaction_to_same_wallet(
+    repo: WalletRepository = WalletInMemory(),
+) -> None:
     to_key = uuid4()
     from_key = to_key
     transaction = Transaction(to_key=to_key, from_key=from_key)
@@ -115,7 +123,9 @@ def test_wallet_repo_should_not_transaction_to_same_wallet(repo: WalletRepositor
         repo.add_transaction(transaction)
 
 
-def test_wallet_repo_should_not_transaction_more_than_balance(repo: WalletRepository = WalletInMemory()) -> None:
+def test_wallet_repo_should_not_transaction_more_than_balance(
+    repo: WalletRepository = WalletInMemory(),
+) -> None:
     wallet1 = Wallet()
     wallet2 = Wallet()
     repo.create(wallet1)
@@ -132,7 +142,9 @@ def test_wallet_repo_should_not_transaction_more_than_balance(repo: WalletReposi
         repo.add_transaction(transaction)
 
 
-def test_wallet_repo_add_and_get_transaction(repo: WalletRepository = WalletInMemory()) -> None:
+def test_wallet_repo_add_and_get_transaction(
+    repo: WalletRepository = WalletInMemory(),
+) -> None:
     wallet1 = Wallet(balance=5.0)
     wallet2 = Wallet()
     repo.create(wallet1)

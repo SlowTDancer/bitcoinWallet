@@ -10,8 +10,8 @@ from core.errors import (
     WalletLimitReachedError,
 )
 from core.user import User, UserRepository
-from infra.sqlite.user_sqlite import UserSqlite
 from infra.in_memory.user_in_memory import UserInMemory
+from infra.sqlite.user_sqlite import UserSqlite
 
 
 def test_user_create() -> None:

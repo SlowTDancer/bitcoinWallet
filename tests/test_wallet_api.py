@@ -91,9 +91,7 @@ def test_get_wallet_by_address_wallet_not_found(client: TestClient) -> None:
 
     assert response.status_code == 405
     assert response.json() == {
-        "error": {
-            "message": f"Wallet with address <{address}> does not exist."
-        }
+        "error": {"message": f"Wallet with address <{address}> does not exist."}
     }
 
 

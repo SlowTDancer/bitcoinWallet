@@ -4,7 +4,7 @@ from uuid import UUID
 
 from constants import DB_PATH
 from core.errors import TransactionDoesNotExistError
-from core.transaction import TransactionRepository, Transaction
+from core.transaction import Transaction, TransactionRepository
 
 
 @dataclass
@@ -39,14 +39,23 @@ class TransactionSqlite(TransactionRepository):
         connection = sqlite3.connect(self.db_path)
         cursor = connection.cursor()
 
-        cursor.execute("SELECT to_key, private_key, from_key, amount FROM transactions"
-                       " WHERE key = ?", (str(transaction_key),))
+        cursor.execute(
+            "SELECT to_key, private_key, from_key, amount FROM transactions"
+            " WHERE key = ?",
+            (str(transaction_key),),
+        )
         result = cursor.fetchone()
         connection.close()
 
         if result is None:
             raise TransactionDoesNotExistError(transaction_key)
-        return Transaction(transaction_key, UUID(result[0]), UUID(result[1]), UUID(result[2]), result[3])
+        return Transaction(
+            transaction_key,
+            UUID(result[0]),
+            UUID(result[1]),
+            UUID(result[2]),
+            result[3],
+        )
 
     def clear(self) -> None:
         connection = sqlite3.connect(self.db_path)
