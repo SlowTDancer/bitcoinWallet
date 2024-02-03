@@ -7,6 +7,9 @@ from infra.fastapi.wallets import wallet_api
 from infra.in_memory.transaction_in_memory import TransactionInMemory
 from infra.in_memory.user_in_memory import UserInMemory
 from infra.in_memory.wallet_in_memory import WalletInMemory
+from infra.sqlite.transaction_sqlite import TransactionSqlite
+from infra.sqlite.user_sqlite import UserSqlite
+from infra.sqlite.wallet_sqlite import WalletSqlite
 
 
 def init_app() -> FastAPI:
