@@ -18,9 +18,9 @@ def init_app() -> FastAPI:
     # os.environ["REPOSITORY_KIND"] = "sqlite"
 
     if os.getenv("REPOSITORY_KIND", "memory") == "sqlite":
-        app.state.transactions = TransactionDatabase()
-        app.state.wallets = WalletDatabase()
-        app.state.users = UserDatabase()
+        app.state.transactions = TransactionSqlite()
+        app.state.wallets = WalletSqlite()
+        app.state.users = UserSqlite()
     else:
         app.state.transactions = TransactionInMemory()
         app.state.wallets = WalletInMemory()
