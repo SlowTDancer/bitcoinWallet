@@ -36,8 +36,8 @@ class WalletSqlite(WalletRepository):
         )
 
         for transaction in transactions:
-            cursor.execute("INSERT INTO wallets_tranasctions (str(wallet_key), str(transaction_key)) "
-                           "VALUES (?, ?);", (public_key, transaction.get_key()))
+            cursor.execute("INSERT INTO wallets_transactions (wallet_key, transaction_key) "
+                           "VALUES (?, ?);", (str(public_key), str(transaction.get_key())))
 
         connection.commit()
         connection.close()
