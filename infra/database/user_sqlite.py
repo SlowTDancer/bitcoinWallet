@@ -9,7 +9,7 @@ from core.user import UserRepository, User
 
 
 @dataclass
-class UserDatabase(UserRepository):
+class UserSqlite(UserRepository):
     db_path: str = DB_PATH
 
     def create(self, user: User) -> None:
