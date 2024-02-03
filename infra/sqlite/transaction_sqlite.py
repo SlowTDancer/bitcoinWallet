@@ -8,7 +8,7 @@ from core.transaction import TransactionRepository, Transaction
 
 
 @dataclass
-class TransactionDatabase(TransactionRepository):
+class TransactionSqlite(TransactionRepository):
     db_path: str = DB_PATH
 
     def create(self, transaction: Transaction) -> None:
