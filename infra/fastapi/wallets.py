@@ -85,7 +85,7 @@ class WalletItemResponseEnvelope(BaseModel):
 def create_wallet(
     wallets: WalletRepositoryDependable,
     users: UserRepositoryDependable,
-    api_key: UUID = Header(alias="API_key"),
+    api_key: UUID = Header(alias="api_key"),
 ) -> dict[str, Any] | JSONResponse:
     wallet = Wallet(private_key=api_key)
     try:
@@ -170,7 +170,7 @@ def get_wallet_by_address(
     address: UUID,
     wallets: WalletRepositoryDependable,
     users: UserRepositoryDependable,
-    api_key: UUID = Header(alias="API_key"),
+    api_key: UUID = Header(alias="api_key"),
 ) -> dict[str, Any] | JSONResponse:
     try:
         users.get(api_key)
@@ -248,7 +248,7 @@ def get_wallet_transactions(
     address: UUID,
     wallets: WalletRepositoryDependable,
     users: UserRepositoryDependable,
-    api_key: UUID = Header(alias="API_key"),
+    api_key: UUID = Header(alias="api_key"),
 ) -> dict[str, Any] | JSONResponse:
     try:
         users.get(api_key)
