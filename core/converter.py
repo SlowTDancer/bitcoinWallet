@@ -6,14 +6,12 @@ from core.errors import ConversionError
 
 
 def get_btc_to_usd_rate() -> Any:
-    url = "https://api.coingecko.com/api/v3/simple/price"
+    url = "https://blockchain.info/ticker"
 
-    params = {"ids": "bitcoin", "vs_currencies": "usd"}
-
-    response = requests.get(url, params=params)
+    response = requests.get(url)
 
     if response.status_code == 200:
         data = response.json()
-        return data["bitcoin"]["usd"]
+        return data['USD']['last']
 
     raise ConversionError()
