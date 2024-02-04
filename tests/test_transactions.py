@@ -38,6 +38,11 @@ def test_transaction_get() -> None:
     assert transaction.get_to_key() == to_key
     assert transaction.get_private_key() != uuid4()
 
+    new_amount = 5.6
+    transaction.update_amount(new_amount)
+    assert transaction.get_amount() != amount
+    assert transaction.get_amount() == new_amount
+
 
 def test_transaction_repository(
     repo: TransactionRepository = TransactionInMemory(),

@@ -36,3 +36,7 @@ class SameWalletsError(Exception):
 
 class WalletLimitReachedError(Exception):
     pass
+
+
+class TransactionStatisticDoesNotExistError(Exception):
+    pass

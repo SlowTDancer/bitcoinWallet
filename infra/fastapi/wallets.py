@@ -65,7 +65,8 @@ class WalletItemResponseEnvelope(BaseModel):
                 "application/json": {
                     "example": {
                         "error": {
-                            "message": "User's with email <email> wallet quantity limit is reached."
+                            "message": "User's with email "
+                                       "<email> wallet quantity limit is reached."
                         }
                     }
                 }
@@ -112,7 +113,8 @@ def create_wallet(
             status_code=410,
             content={
                 "error": {
-                    "message": f"User's with email <{user.get_email()}> wallet quantity limit is reached."
+                    "message": f"User's with email <{user.get_email()}>"
+                               " wallet quantity limit is reached."
                 }
             },
         )
@@ -149,7 +151,8 @@ def create_wallet(
                 "application/json": {
                     "example": {
                         "error": {
-                            "message": "Wallet with address <address> does not belong to the correct owner."
+                            "message": "Wallet with address <address>"
+                                       " does not belong to the correct owner."
                         }
                     }
                 }
@@ -199,7 +202,8 @@ def get_wallet_by_address(
             status_code=409,
             content={
                 "error": {
-                    "message": f"Wallet with address <{address}> does not belong to the correct owner."
+                    "message": f"Wallet with address <{address}>"
+                               " does not belong to the correct owner."
                 }
             },
         )
@@ -236,7 +240,8 @@ def get_wallet_by_address(
                 "application/json": {
                     "example": {
                         "error": {
-                            "message": "Wallet with address <address> does not belong to the correct owner."
+                            "message": "Wallet with address "
+                                       "<address> does not belong to the correct owner."
                         }
                     }
                 }
@@ -281,7 +286,8 @@ def get_wallet_transactions(
             status_code=409,
             content={
                 "error": {
-                    "message": f"Wallet with address <{address}> does not belong to the correct owner."
+                    "message": f"Wallet with address <{address}>"
+                               " does not belong to the correct owner."
                 }
             },
         )

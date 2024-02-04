@@ -10,10 +10,16 @@ from core.errors import (
     InvalidOwnerError,
     NotEnoughBalanceError,
     SameWalletsError,
-    WalletDoesNotExistError, UserDoesNotExistError,
+    UserDoesNotExistError,
+    WalletDoesNotExistError,
 )
 from core.transaction import Transaction
-from infra.fastapi.dependables import WalletRepositoryDependable, UserRepositoryDependable
+from core.transaction_statistic import TransactionStatistic
+from infra.fastapi.dependables import (
+    TransactionStatisticRepositoryDependable,
+    UserRepositoryDependable,
+    WalletRepositoryDependable,
+)
 from infra.fastapi.wallets import (
     TransactionItemResponse,
     TransactionItemResponseEnvelope,
@@ -55,7 +61,8 @@ class MakeTransactionRequest(BaseModel):
                 "application/json": {
                     "example": {
                         "error": {
-                            "message": "Wallet with address <address> does not belong to the correct owner."
+                            "message": "Wallet with address "
+                                       "<address> does not belong to the correct owner."
                         }
                     }
                 }
@@ -66,7 +73,8 @@ class MakeTransactionRequest(BaseModel):
                 "application/json": {
                     "example": {
                         "error": {
-                            "message": f"Wallet with address <address> does not have enough balance."
+                            "message": "Wallet with address "
+                                       "<address> does not have enough balance."
                         }
                     }
                 }
@@ -77,8 +85,9 @@ class MakeTransactionRequest(BaseModel):
                 "application/json": {
                     "example": {
                         "error": {
-                            "message": f"You are trying to make transaction from wallet with address <from_address> "
-                            f"to same wallet with address <to_address>."
+                            "message": "You are trying to make transaction "
+                                       "from wallet with address <from_address> "
+                                       "to same wallet with address <to_address>."
                         }
                     }
                 }
@@ -90,10 +99,11 @@ def make_transaction(
     request: MakeTransactionRequest,
     wallets: WalletRepositoryDependable,
     users: UserRepositoryDependable,
+    transaction_statistics: TransactionStatisticRepositoryDependable,
     api_key: UUID = Header(alias="api_key"),
 ) -> JSONResponse | dict[str, TransactionItemResponse]:
     try:
-        user = users.get(api_key)
+        users.get(api_key)
     except UserDoesNotExistError:
         return JSONResponse(
             status_code=404,
@@ -106,7 +116,8 @@ def make_transaction(
             status_code=409,
             content={
                 "error": {
-                    "message": f"Wallet with address <{request.from_key}> does not belong to the correct owner."
+                    "message": f"Wallet with address <{request.from_key}> "
+                               "does not belong to the correct owner."
                 }
             },
         )
@@ -115,7 +126,8 @@ def make_transaction(
             status_code=405,
             content={
                 "error": {
-                    "message": f"Wallet with address <{request.from_key}> does not exist."
+                    "message": "Wallet with address "
+                               f"<{request.from_key}> does not exist."
                 }
             },
         )
@@ -133,8 +145,6 @@ def make_transaction(
         )
 
     amount = request.amount
-    if from_wallet.get_private_key() != to_wallet.get_private_key():
-        amount *= 1 - 0.015
 
     transaction = Transaction(
         private_key=api_key,
@@ -142,9 +152,18 @@ def make_transaction(
         to_key=request.to_key,
         amount=amount,
     )
-
+    transaction_statistic = TransactionStatistic(transaction.get_key())
+    new_amount = transaction_statistic.calculate_profit(
+        from_wallet.get_private_key(), to_wallet.get_private_key(), amount
+    )
+    transaction.update_amount(new_amount)
     try:
         wallets.add_transaction(transaction)
+        if (
+            transaction_statistic.get_profit() != 0.0
+        ):  # this is questionable weather i should count even 0 profits in
+            # statistics or not
+            transaction_statistics.create(transaction_statistic)
         return {
             "transaction": TransactionItemResponse(
                 to_key=transaction.get_to_key(),
@@ -157,8 +176,9 @@ def make_transaction(
             status_code=420,
             content={
                 "error": {
-                    "message": f"You are trying to make transaction from wallet with address <{request.from_key}> "
-                    f"to same wallet with address <{request.to_key}>."
+                    "message": "You are trying to make transaction"
+                               f" from wallet with address <{request.from_key}> "
+                               f"to same wallet with address <{request.to_key}>."
                 }
             },
         )
@@ -167,7 +187,8 @@ def make_transaction(
             status_code=419,
             content={
                 "error": {
-                    "message": f"Wallet with address <{request.from_key}> does not have enough balance."
+                    "message": f"Wallet with address <{request.from_key}>"
+                               " does not have enough balance."
                 }
             },
         )
@@ -201,7 +222,9 @@ def get_transactions(
         )
 
     wallet_ids = user.get_wallets()
-    transactions = [wallets.get_transactions(api_key, wallet_id) for wallet_id in wallet_ids]
+    transactions = [
+        wallets.get_transactions(api_key, wallet_id) for wallet_id in wallet_ids
+    ]
     return {
         "transactions": [
             TransactionItemResponse(
@@ -209,6 +232,7 @@ def get_transactions(
                 from_key=trans.get_from_key(),
                 amount=trans.get_amount(),
             )
-            for transaction in transactions for trans in transaction
+            for transaction in transactions
+            for trans in transaction
         ]
     }

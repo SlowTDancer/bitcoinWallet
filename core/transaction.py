@@ -28,6 +28,9 @@ class Transaction:
     def get_amount(self) -> float:
         return self.amount
 
+    def update_amount(self, new_amount: float) -> None:
+        self.amount = new_amount
+
 
 class TransactionRepository(RepositoryABC[Transaction]):
     @abstractmethod
