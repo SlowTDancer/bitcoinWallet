@@ -16,7 +16,7 @@ def mock_requests_get() -> Generator[MagicMock, None, None]:
 def test_successful_request(mock_requests_get: MagicMock) -> None:
     mock_response = MagicMock()
     mock_response.status_code = 200
-    mock_response.json.return_value = {"bitcoin": {"usd": 50000}}
+    mock_response.json.return_value = {"USD": {"last": 50000}}
     mock_requests_get.return_value = mock_response
 
     result = get_btc_to_usd_rate()
