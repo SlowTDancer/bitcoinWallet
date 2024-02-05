@@ -6,6 +6,7 @@ from fastapi import APIRouter, Header
 from pydantic import BaseModel
 from starlette.responses import JSONResponse
 
+from constants import ERROR_RESPONSES
 from core.errors import (
     InvalidOwnerError,
     NotEnoughBalanceError,
@@ -40,56 +41,11 @@ class MakeTransactionRequest(BaseModel):
     status_code=201,
     response_model=TransactionItemResponseEnvelope,
     responses={
-        404: {
-            "content": {
-                "application/json": {
-                    "example": {"error": {"message": "User does not exist."}}
-                }
-            }
-        },
-        405: {
-            "content": {
-                "application/json": {
-                    "example": {
-                        "error": {"Wallet with address <address> does not exist."}
-                    }
-                }
-            }
-        },
-        409: {
-            "content": {
-                "application/json": {
-                    "example": {
-                        "error": {
-                            "message": "Wallet with address <address> does not belong to the correct owner."
-                        }
-                    }
-                }
-            }
-        },
-        419: {
-            "content": {
-                "application/json": {
-                    "example": {
-                        "error": {
-                            "message": f"Wallet with address <address> does not have enough balance."
-                        }
-                    }
-                }
-            }
-        },
-        420: {
-            "content": {
-                "application/json": {
-                    "example": {
-                        "error": {
-                            "message": f"You are trying to make transaction from wallet with address <from_address> "
-                            f"to same wallet with address <to_address>."
-                        }
-                    }
-                }
-            }
-        },
+        404: ERROR_RESPONSES[404],
+        405: ERROR_RESPONSES[405],
+        409: ERROR_RESPONSES[409],
+        419: ERROR_RESPONSES[419],
+        420: ERROR_RESPONSES[420],
     },
 )
 def make_transaction(
@@ -113,7 +69,9 @@ def make_transaction(
             status_code=409,
             content={
                 "error": {
-                    "message": f"Wallet with address <{request.from_key}> does not belong to the correct owner."
+                    "message": "Wallet with address "
+                    f"<{request.from_key}> does "
+                    "not belong to the correct owner."
                 }
             },
         )
@@ -122,7 +80,8 @@ def make_transaction(
             status_code=405,
             content={
                 "error": {
-                    "message": f"Wallet with address <{request.from_key}> does not exist."
+                    "message": "Wallet with address "
+                    f"<{request.from_key}> does not exist."
                 }
             },
         )
@@ -168,7 +127,8 @@ def make_transaction(
             status_code=420,
             content={
                 "error": {
-                    "message": f"You are trying to make transaction from wallet with address <{request.from_key}> "
+                    "message": "You are trying to make transaction from "
+                    f"wallet with address <{request.from_key}> "
                     f"to same wallet with address <{request.to_key}>."
                 }
             },
@@ -178,7 +138,8 @@ def make_transaction(
             status_code=419,
             content={
                 "error": {
-                    "message": f"Wallet with address <{request.from_key}> does not have enough balance."
+                    "message": f"Wallet with address <{request.from_key}> does "
+                    "not have enough balance."
                 }
             },
         )
@@ -189,13 +150,7 @@ def make_transaction(
     status_code=200,
     response_model=TransactionListResponseEnvelope,
     responses={
-        404: {
-            "content": {
-                "application/json": {
-                    "example": {"error": {"message": "User does not exist."}}
-                }
-            }
-        },
+        404: ERROR_RESPONSES[404],
     },
 )
 def get_transactions(
@@ -212,17 +167,17 @@ def get_transactions(
         )
 
     wallet_ids = user.get_wallets()
-    transactions = [
+    user_transactions = [
         wallets.get_transactions(api_key, wallet_id) for wallet_id in wallet_ids
     ]
     return {
         "transactions": [
             TransactionItemResponse(
-                to_key=trans.get_to_key(),
-                from_key=trans.get_from_key(),
-                amount=trans.get_amount(),
+                to_key=transaction.get_to_key(),
+                from_key=transaction.get_from_key(),
+                amount=transaction.get_amount(),
             )
-            for transaction in transactions
-            for trans in transaction
+            for wallet_transactions in user_transactions
+            for transaction in wallet_transactions
         ]
     }

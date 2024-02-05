@@ -25,6 +25,7 @@ class User:
     def add_wallet(self, wallet_key: UUID) -> None:
         if len(self.get_wallets()) >= MAX_WALLETS_PER_USER:
             raise WalletLimitReachedError(self.get_email())
+
         self.wallets.append(wallet_key)
 
 

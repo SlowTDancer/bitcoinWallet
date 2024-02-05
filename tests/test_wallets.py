@@ -3,12 +3,7 @@ from uuid import UUID, uuid4
 import pytest
 
 from constants import TEST_DB_PATH
-from core.errors import (
-    InvalidOwnerError,
-    NotEnoughBalanceError,
-    SameWalletsError,
-    WalletDoesNotExistError,
-)
+from core.errors import InvalidOwnerError, SameWalletsError, WalletDoesNotExistError
 from core.transaction import Transaction
 from core.wallet import Wallet, WalletRepository
 from infra.in_memory.wallet_in_memory import WalletInMemory

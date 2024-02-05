@@ -57,9 +57,12 @@ class UserSqlite(UserRepository):
         )
         result = cursor.fetchall()
         connection.close()
-        if result is None:
+
+        return (
             User(email, private_key)
-        return User(email, private_key, [uuid.UUID(row[0]) for row in result])
+            if result is None
+            else User(email, private_key, [uuid.UUID(row[0]) for row in result])
+        )
 
     def _get_by_email(self, email: str) -> User | None:
         connection = sqlite3.connect(self.db_path)
@@ -77,9 +80,11 @@ class UserSqlite(UserRepository):
         )
         result = cursor.fetchall()
         connection.close()
-        if result is None:
-            return User(email, user_private_key)
-        return User(email, user_private_key, [uuid.UUID(row[0]) for row in result])
+        return (
+            User(email, user_private_key)
+            if result is None
+            else User(email, user_private_key, [uuid.UUID(row[0]) for row in result])
+        )
 
     def add_wallet(self, user_key: UUID, wallet_key: UUID) -> None:
         user = self.get(user_key)

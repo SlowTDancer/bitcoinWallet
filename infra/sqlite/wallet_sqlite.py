@@ -3,12 +3,7 @@ from dataclasses import dataclass
 from uuid import UUID
 
 from constants import DB_PATH
-from core.errors import (
-    InvalidOwnerError,
-    NotEnoughBalanceError,
-    SameWalletsError,
-    WalletDoesNotExistError,
-)
+from core.errors import InvalidOwnerError, SameWalletsError, WalletDoesNotExistError
 from core.transaction import Transaction
 from core.wallet import Wallet, WalletRepository
 from infra.sqlite.transaction_sqlite import TransactionSqlite

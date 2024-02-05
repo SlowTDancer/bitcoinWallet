@@ -1,13 +1,12 @@
 from __future__ import annotations
 
-from typing import Dict
 from uuid import UUID
 
-from fastapi import APIRouter, Header, HTTPException
+from fastapi import APIRouter, Header
 from pydantic import BaseModel
 from starlette.responses import JSONResponse
 
-from constants import ADMIN_API_KEY
+from constants import ERROR_RESPONSES
 from core.admin_checker import check_admin
 from core.errors import InvalidAdminAPIKeyError
 from infra.fastapi.dependables import TransactionStatisticRepositoryDependable
@@ -29,13 +28,7 @@ class StatisticItemResponseEnvelope(BaseModel):
     status_code=200,
     response_model=StatisticItemResponseEnvelope,
     responses={
-        401: {
-            "content": {
-                "application/json": {
-                    "example": {"error": {"message": "Invalid admin API key <key>"}}
-                }
-            }
-        },
+        401: ERROR_RESPONSES[401],
     },
 )
 def get_transactions(
@@ -54,5 +47,6 @@ def get_transactions(
     return {
         "statistics": StatisticItemResponse(
             transactions_number=statistics.get_transactions_number(),
-            platform_profit=statistics.get_platform_profit())
+            platform_profit=statistics.get_platform_profit(),
+        )
     }

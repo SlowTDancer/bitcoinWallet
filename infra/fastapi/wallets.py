@@ -7,6 +7,7 @@ from fastapi import APIRouter, Header
 from pydantic import BaseModel
 from starlette.responses import JSONResponse
 
+from constants import ERROR_RESPONSES
 from core.converter import get_btc_to_usd_rate
 from core.errors import (
     ConversionError,
@@ -53,33 +54,9 @@ class WalletItemResponseEnvelope(BaseModel):
     status_code=201,
     response_model=WalletItemResponseEnvelope,
     responses={
-        404: {
-            "content": {
-                "application/json": {
-                    "example": {"error": {"message": "User does not exist."}}
-                }
-            }
-        },
-        410: {
-            "content": {
-                "application/json": {
-                    "example": {
-                        "error": {
-                            "message": "User's with email <email> wallet quantity limit is reached."
-                        }
-                    }
-                }
-            }
-        },
-        415: {
-            "content": {
-                "application/json": {
-                    "example": {
-                        "error": {"message": "conversion of btc to usd failed."}
-                    }
-                }
-            }
-        },
+        404: ERROR_RESPONSES[404],
+        410: ERROR_RESPONSES[410],
+        415: ERROR_RESPONSES[415],
     },
 )
 def create_wallet(
@@ -112,7 +89,8 @@ def create_wallet(
             status_code=410,
             content={
                 "error": {
-                    "message": f"User's with email <{user.get_email()}> wallet quantity limit is reached."
+                    "message": f"User's with email <{user.get_email()}> wallet "
+                    "quantity limit is reached."
                 }
             },
         )
@@ -128,42 +106,10 @@ def create_wallet(
     status_code=200,
     response_model=WalletItemResponseEnvelope,
     responses={
-        404: {
-            "content": {
-                "application/json": {
-                    "example": {"error": {"message": "User does not exist."}}
-                }
-            }
-        },
-        405: {
-            "content": {
-                "application/json": {
-                    "example": {
-                        "error": {"Wallet with address <address> does not exist."}
-                    }
-                }
-            }
-        },
-        409: {
-            "content": {
-                "application/json": {
-                    "example": {
-                        "error": {
-                            "message": "Wallet with address <address> does not belong to the correct owner."
-                        }
-                    }
-                }
-            }
-        },
-        415: {
-            "content": {
-                "application/json": {
-                    "example": {
-                        "error": {"message": "conversion of btc to usd failed."}
-                    }
-                }
-            }
-        },
+        404: ERROR_RESPONSES[404],
+        405: ERROR_RESPONSES[405],
+        409: ERROR_RESPONSES[409],
+        415: ERROR_RESPONSES[415],
     },
 )
 def get_wallet_by_address(
@@ -199,7 +145,8 @@ def get_wallet_by_address(
             status_code=409,
             content={
                 "error": {
-                    "message": f"Wallet with address <{address}> does not belong to the correct owner."
+                    "message": f"Wallet with address <{address}> "
+                    "does not belong to the correct owner."
                 }
             },
         )
@@ -215,33 +162,9 @@ def get_wallet_by_address(
     status_code=200,
     response_model=TransactionListResponseEnvelope,
     responses={
-        404: {
-            "content": {
-                "application/json": {
-                    "example": {"error": {"message": "User does not exist."}}
-                }
-            }
-        },
-        405: {
-            "content": {
-                "application/json": {
-                    "example": {
-                        "error": {"Wallet with address <address> does not exist."}
-                    }
-                }
-            }
-        },
-        409: {
-            "content": {
-                "application/json": {
-                    "example": {
-                        "error": {
-                            "message": "Wallet with address <address> does not belong to the correct owner."
-                        }
-                    }
-                }
-            }
-        },
+        404: ERROR_RESPONSES[404],
+        405: ERROR_RESPONSES[405],
+        409: ERROR_RESPONSES[409],
     },
 )
 def get_wallet_transactions(
@@ -258,7 +181,7 @@ def get_wallet_transactions(
             content={"error": {"message": "User does not exist."}},
         )
     try:
-        transactions = wallets.get_transactions(api_key, address)
+        wallet_transactions = wallets.get_transactions(api_key, address)
         return {
             "transactions": [
                 TransactionItemResponse(
@@ -266,7 +189,7 @@ def get_wallet_transactions(
                     from_key=transaction.get_from_key(),
                     amount=transaction.get_amount(),
                 )
-                for transaction in transactions
+                for transaction in wallet_transactions
             ]
         }
     except WalletDoesNotExistError:
@@ -281,7 +204,8 @@ def get_wallet_transactions(
             status_code=409,
             content={
                 "error": {
-                    "message": f"Wallet with address <{address}> does not belong to the correct owner."
+                    "message": f"Wallet with address <{address}> "
+                    "does not belong to the correct owner."
                 }
             },
         )

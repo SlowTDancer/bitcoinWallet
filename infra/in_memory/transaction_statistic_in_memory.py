@@ -27,9 +27,10 @@ class TransactionStatisticInMemory(TransactionStatisticRepository):
             raise TransactionStatisticDoesNotExistError(key)
 
     def get_statistics(self) -> Statistics:
-        profit = 0.0
-        for statistic in self.transaction_statistics.values():
-            profit += statistic.get_profit()
+        profit = sum(
+            transaction_statistic.get_profit()
+            for transaction_statistic in self.transaction_statistics.values()
+        )
 
         return Statistics(
             transactions_number=len(self.transaction_statistics.values()),

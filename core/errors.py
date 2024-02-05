@@ -40,3 +40,7 @@ class WalletLimitReachedError(Exception):
 
 class TransactionStatisticDoesNotExistError(Exception):
     pass
+
+
+class InvalidAdminAPIKeyError(Exception):
+    pass

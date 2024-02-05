@@ -4,6 +4,7 @@ from fastapi import APIRouter
 from pydantic import BaseModel
 from starlette.responses import JSONResponse
 
+from constants import ERROR_RESPONSES
 from core.errors import UserAlreadyExistsError
 from core.user import User
 from infra.fastapi.dependables import UserRepositoryDependable
@@ -27,21 +28,7 @@ class RegisterUserResponseEnvelope(BaseModel):
     "/users",
     status_code=201,
     response_model=RegisterUserResponseEnvelope,
-    responses={
-        409: {
-            "content": {
-                "application/json": {
-                    "example": {
-                        "error": {
-                            "error": {
-                                "message": "user with email: <email> already exists."
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    },
+    responses={409: ERROR_RESPONSES[409]},
 )
 def register_user(
     request: RegisterUserRequest, users: UserRepositoryDependable

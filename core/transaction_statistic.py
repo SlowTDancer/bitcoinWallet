@@ -29,7 +29,8 @@ class TransactionStatistic:
         if from_wallet.get_private_key() != to_wallet.get_private_key():
             self.profit = transaction_amount * TRANSFER_FEE
         required_amount = transaction_amount + self.profit
-        if from_wallet.get_balance() <= required_amount:
+
+        if from_wallet.get_balance() < required_amount:
             raise NotEnoughBalanceError(from_wallet.get_public_key())
         from_wallet.update_balance(-self.profit)
 
