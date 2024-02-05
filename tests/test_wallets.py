@@ -73,7 +73,7 @@ def test_wallet_repo_create_and_get(repo: WalletRepository = WalletInMemory()) -
 
 
 def test_wallet_repo_should_not_get_unknown(
-    repo: WalletRepository = WalletInMemory(),
+        repo: WalletRepository = WalletInMemory(),
 ) -> None:
     unknown_key = uuid4()
 
@@ -91,7 +91,7 @@ def test_wallet_repo_get_wallet(repo: WalletRepository = WalletInMemory()) -> No
 
 
 def test_wallet_repo_should_not_get_wallet_of_diff_user(
-    repo: WalletRepository = WalletInMemory(),
+        repo: WalletRepository = WalletInMemory(),
 ) -> None:
     user_key = uuid4()
     wallet = Wallet()
@@ -103,7 +103,7 @@ def test_wallet_repo_should_not_get_wallet_of_diff_user(
 
 
 def test_wallet_repo_should_not_get_unknown_wallet(
-    repo: WalletRepository = WalletInMemory(),
+        repo: WalletRepository = WalletInMemory(),
 ) -> None:
     unknown_key = uuid4()
     user_key = uuid4()
@@ -113,7 +113,7 @@ def test_wallet_repo_should_not_get_unknown_wallet(
 
 
 def test_wallet_repo_should_not_transaction_to_same_wallet(
-    repo: WalletRepository = WalletInMemory(),
+        repo: WalletRepository = WalletInMemory(),
 ) -> None:
     to_key = uuid4()
     from_key = to_key
@@ -123,27 +123,8 @@ def test_wallet_repo_should_not_transaction_to_same_wallet(
         repo.add_transaction(transaction)
 
 
-def test_wallet_repo_should_not_transaction_more_than_balance(
-    repo: WalletRepository = WalletInMemory(),
-) -> None:
-    wallet1 = Wallet()
-    wallet2 = Wallet()
-    repo.create(wallet1)
-    repo.create(wallet2)
-
-    transaction = Transaction(
-        private_key=wallet1.get_private_key(),
-        to_key=wallet2.get_public_key(),
-        from_key=wallet1.get_public_key(),
-        amount=3.0,
-    )
-
-    with pytest.raises(NotEnoughBalanceError, match=str(wallet1.get_public_key())):
-        repo.add_transaction(transaction)
-
-
 def test_wallet_repo_add_and_get_transaction(
-    repo: WalletRepository = WalletInMemory(),
+        repo: WalletRepository = WalletInMemory(),
 ) -> None:
     wallet1 = Wallet(balance=5.0)
     wallet2 = Wallet()
@@ -198,12 +179,6 @@ def test_wallet_sqlite_should_not_get_unknown_wallet() -> None:
 def test_wallet_sqlite_should_not_transaction_to_same_wallet() -> None:
     repo = WalletSqlite(TEST_DB_PATH)
     test_wallet_repo_should_not_transaction_to_same_wallet(repo)
-    repo.clear()
-
-
-def test_wallet_sqlite_should_not_transaction_more_than_balance() -> None:
-    repo = WalletSqlite(TEST_DB_PATH)
-    test_wallet_repo_should_not_transaction_more_than_balance(repo)
     repo.clear()
 
 

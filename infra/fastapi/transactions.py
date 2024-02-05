@@ -14,7 +14,9 @@ from core.errors import (
     WalletDoesNotExistError,
 )
 from core.transaction import Transaction
+from core.transaction_statistic import TransactionStatistic
 from infra.fastapi.dependables import (
+    TransactionStatisticRepositoryDependable,
     UserRepositoryDependable,
     WalletRepositoryDependable,
 )
@@ -94,10 +96,11 @@ def make_transaction(
     request: MakeTransactionRequest,
     wallets: WalletRepositoryDependable,
     users: UserRepositoryDependable,
+    transaction_statistics: TransactionStatisticRepositoryDependable,
     api_key: UUID = Header(alias="api_key"),
 ) -> JSONResponse | dict[str, TransactionItemResponse]:
     try:
-        user = users.get(api_key)
+        users.get(api_key)
     except UserDoesNotExistError:
         return JSONResponse(
             status_code=404,
@@ -137,8 +140,6 @@ def make_transaction(
         )
 
     amount = request.amount
-    if from_wallet.get_private_key() != to_wallet.get_private_key():
-        amount *= 1 - 0.015
 
     transaction = Transaction(
         private_key=api_key,
@@ -146,9 +147,12 @@ def make_transaction(
         to_key=request.to_key,
         amount=amount,
     )
+    transaction_statistic = TransactionStatistic(transaction_key=transaction.get_key())
+    transaction_statistic.system_update(from_wallet, to_wallet, amount)
 
     try:
         wallets.add_transaction(transaction)
+        transaction_statistics.create(transaction_statistic)
         return {
             "transaction": TransactionItemResponse(
                 to_key=transaction.get_to_key(),

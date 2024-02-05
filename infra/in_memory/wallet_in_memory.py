@@ -3,7 +3,6 @@ from uuid import UUID
 
 from core.errors import (
     InvalidOwnerError,
-    NotEnoughBalanceError,
     SameWalletsError,
     WalletDoesNotExistError,
 )
@@ -43,16 +42,12 @@ class WalletInMemory(WalletRepository):
 
         from_wallet = self.get_wallet(from_user_id, from_wallet_id)
         to_wallet = self.get(to_wallet_id)
-        # todo the same user two wallets check goes in
-        #  fastAPI function,it determines "amount"
-        if from_wallet.get_balance() < transaction.get_amount():
-            raise NotEnoughBalanceError(from_wallet_id)
-        else:
-            amount = transaction.get_amount()
-            from_wallet.update_balance(-amount)
-            to_wallet.update_balance(amount)
-            from_wallet.add_transaction(transaction)
-            to_wallet.add_transaction(transaction)
+        
+        amount = transaction.get_amount()
+        from_wallet.update_balance(-amount)
+        to_wallet.update_balance(amount)
+        from_wallet.add_transaction(transaction)
+        to_wallet.add_transaction(transaction)
 
     def get_transactions(self, user_key: UUID, wallet_key: UUID) -> list[Transaction]:
         return self.get_wallet(user_key, wallet_key).get_transactions()
