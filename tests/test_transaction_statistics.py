@@ -2,12 +2,12 @@ from uuid import UUID, uuid4
 
 import pytest
 
-from constants import TRANSFER_FEE, TEST_DB_PATH
+from constants import TEST_DB_PATH, TRANSFER_FEE
 from core.errors import NotEnoughBalanceError, TransactionStatisticDoesNotExistError
 from core.transaction_statistic import (
+    Statistics,
     TransactionStatistic,
     TransactionStatisticRepository,
-    Statistics,
 )
 from core.wallet import Wallet
 from infra.in_memory.transaction_statistic_in_memory import TransactionStatisticInMemory

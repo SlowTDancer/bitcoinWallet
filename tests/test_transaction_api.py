@@ -23,7 +23,7 @@ def test_make_transaction_success(client: TestClient) -> None:
     public_key1 = wallet_response1.json()["wallet"]["public_key"]
     public_key2 = wallet_response2.json()["wallet"]["public_key"]
 
-    request_data = {"from_key": public_key1, "to_key": public_key2, "amount": 1}
+    request_data = {"from_key": public_key1, "to_key": public_key2, "amount": 0.5}
     response = client.post(
         "/transactions", json=request_data, headers=user_response.json()["user"]
     )
@@ -76,7 +76,7 @@ def test_make_transaction_same_wallets(client: TestClient) -> None:
 
     public_key = wallet_response.json()["wallet"]["public_key"]
 
-    request_data = {"from_key": public_key, "to_key": public_key, "amount": 1}
+    request_data = {"from_key": public_key, "to_key": public_key, "amount": 0.5}
     response = client.post(
         "/transactions", json=request_data, headers=user_response.json()["user"]
     )

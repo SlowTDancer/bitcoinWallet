@@ -22,7 +22,7 @@ def get_user_repository(request: Request) -> UserRepository:
 
 
 def get_transaction_statistic_repository(
-        request: Request,
+    request: Request,
 ) -> TransactionStatisticRepository:
     return request.app.state.transaction_statistics  # type: ignore
 

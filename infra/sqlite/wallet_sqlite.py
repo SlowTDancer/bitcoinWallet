@@ -90,8 +90,6 @@ class WalletSqlite(WalletRepository):
         from_wallet = self.get_wallet(from_user_id, from_wallet_id)
         to_wallet = self.get(to_wallet_id)
 
-
-
         connection = sqlite3.connect(self.db_path)
         cursor = connection.cursor()
 

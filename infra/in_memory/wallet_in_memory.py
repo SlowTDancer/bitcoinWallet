@@ -1,11 +1,7 @@
 from dataclasses import dataclass, field
 from uuid import UUID
 
-from core.errors import (
-    InvalidOwnerError,
-    SameWalletsError,
-    WalletDoesNotExistError,
-)
+from core.errors import InvalidOwnerError, SameWalletsError, WalletDoesNotExistError
 from core.transaction import Transaction
 from core.wallet import Wallet, WalletRepository
 
@@ -42,7 +38,7 @@ class WalletInMemory(WalletRepository):
 
         from_wallet = self.get_wallet(from_user_id, from_wallet_id)
         to_wallet = self.get(to_wallet_id)
-        
+
         amount = transaction.get_amount()
         from_wallet.update_balance(-amount)
         to_wallet.update_balance(amount)
