@@ -1,6 +1,6 @@
 from uuid import UUID, uuid4
 
-from sympy.testing import pytest
+import pytest
 
 from constants import TRANSFER_FEE, TEST_DB_PATH
 from core.errors import NotEnoughBalanceError, TransactionStatisticDoesNotExistError
