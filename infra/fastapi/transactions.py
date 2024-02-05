@@ -62,7 +62,7 @@ class MakeTransactionRequest(BaseModel):
                     "example": {
                         "error": {
                             "message": "Wallet with address "
-                                       "<address> does not belong to the correct owner."
+                            "<address> does not belong to the correct owner."
                         }
                     }
                 }
@@ -74,7 +74,7 @@ class MakeTransactionRequest(BaseModel):
                     "example": {
                         "error": {
                             "message": "Wallet with address "
-                                       "<address> does not have enough balance."
+                            "<address> does not have enough balance."
                         }
                     }
                 }
@@ -86,8 +86,8 @@ class MakeTransactionRequest(BaseModel):
                     "example": {
                         "error": {
                             "message": "You are trying to make transaction "
-                                       "from wallet with address <from_address> "
-                                       "to same wallet with address <to_address>."
+                            "from wallet with address <from_address> "
+                            "to same wallet with address <to_address>."
                         }
                     }
                 }
@@ -117,7 +117,7 @@ def make_transaction(
             content={
                 "error": {
                     "message": f"Wallet with address <{request.from_key}> "
-                               "does not belong to the correct owner."
+                    "does not belong to the correct owner."
                 }
             },
         )
@@ -127,7 +127,7 @@ def make_transaction(
             content={
                 "error": {
                     "message": "Wallet with address "
-                               f"<{request.from_key}> does not exist."
+                    f"<{request.from_key}> does not exist."
                 }
             },
         )
@@ -170,8 +170,8 @@ def make_transaction(
             content={
                 "error": {
                     "message": "You are trying to make transaction"
-                               f" from wallet with address <{request.from_key}> "
-                               f"to same wallet with address <{request.to_key}>."
+                    f" from wallet with address <{request.from_key}> "
+                    f"to same wallet with address <{request.to_key}>."
                 }
             },
         )
@@ -181,7 +181,7 @@ def make_transaction(
             content={
                 "error": {
                     "message": f"Wallet with address <{request.from_key}>"
-                               " does not have enough balance."
+                    " does not have enough balance."
                 }
             },
         )
