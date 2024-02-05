@@ -10,10 +10,14 @@ from core.errors import (
     InvalidOwnerError,
     NotEnoughBalanceError,
     SameWalletsError,
-    WalletDoesNotExistError, UserDoesNotExistError,
+    UserDoesNotExistError,
+    WalletDoesNotExistError,
 )
 from core.transaction import Transaction
-from infra.fastapi.dependables import WalletRepositoryDependable, UserRepositoryDependable
+from infra.fastapi.dependables import (
+    UserRepositoryDependable,
+    WalletRepositoryDependable,
+)
 from infra.fastapi.wallets import (
     TransactionItemResponse,
     TransactionItemResponseEnvelope,
@@ -201,7 +205,9 @@ def get_transactions(
         )
 
     wallet_ids = user.get_wallets()
-    transactions = [wallets.get_transactions(api_key, wallet_id) for wallet_id in wallet_ids]
+    transactions = [
+        wallets.get_transactions(api_key, wallet_id) for wallet_id in wallet_ids
+    ]
     return {
         "transactions": [
             TransactionItemResponse(
@@ -209,6 +215,7 @@ def get_transactions(
                 from_key=trans.get_from_key(),
                 amount=trans.get_amount(),
             )
-            for transaction in transactions for trans in transaction
+            for transaction in transactions
+            for trans in transaction
         ]
     }

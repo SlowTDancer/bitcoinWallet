@@ -12,6 +12,6 @@ def get_btc_to_usd_rate() -> Any:
 
     if response.status_code == 200:
         data = response.json()
-        return data['USD']['last']
+        return data["USD"]["last"]
 
     raise ConversionError()
