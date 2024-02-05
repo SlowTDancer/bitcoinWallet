@@ -1,6 +1,9 @@
 from uuid import UUID, uuid4
 
+from sympy.testing import pytest
+
 from constants import TRANSFER_FEE, TEST_DB_PATH
+from core.errors import NotEnoughBalanceError, TransactionStatisticDoesNotExistError
 from core.transaction_statistic import (
     TransactionStatistic,
     TransactionStatisticRepository,
@@ -54,6 +57,16 @@ def test_transaction_statistic_system_update_different_user_wallets() -> None:
     assert transaction_statistic.get_profit() == profit
 
 
+def test_transaction_statistic_system_update_not_enough_balance() -> None:
+    transaction_statistic = TransactionStatistic()
+    balance = 10
+    from_wallet = Wallet(balance=balance)
+    to_wallet = Wallet()
+    amount = 100
+    with pytest.raises(NotEnoughBalanceError, match=str(from_wallet.get_public_key())):
+        transaction_statistic.system_update(from_wallet, to_wallet, amount)
+
+
 def test_statistics_create() -> None:
     statistic = Statistics()
 
@@ -79,6 +92,15 @@ def test_transaction_statistic_repo_create_and_get(
     repo.create(transaction_statistic)
 
     assert repo.get(transaction_statistic.get_key()) == transaction_statistic
+
+
+def test_transaction_statistic_repo_should_not_get_unknown(
+    repo: TransactionStatisticRepository = TransactionStatisticInMemory(),
+) -> None:
+    unknown_key = uuid4()
+
+    with pytest.raises(TransactionStatisticDoesNotExistError, match=str(unknown_key)):
+        repo.get(unknown_key)
 
 
 def test_transaction_statistic_repo_get_statistics_on_empty(
@@ -119,3 +141,10 @@ def test_transaction_statistic_sqlite_get_statistics() -> None:
     repo = TransactionStatisticSqlite(TEST_DB_PATH)
     test_transaction_statistic_repo_get_statistics(repo)
     repo.clear()
+
+
+def test_transaction_statistic_sqlite_should_not_get_unknown() -> None:
+    repo = TransactionStatisticSqlite(TEST_DB_PATH)
+    test_transaction_statistic_repo_should_not_get_unknown(repo)
+    repo.clear()
+
