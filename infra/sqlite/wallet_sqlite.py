@@ -5,7 +5,6 @@ from uuid import UUID
 from constants import DB_PATH
 from core.errors import (
     InvalidOwnerError,
-    NotEnoughBalanceError,
     SameWalletsError,
     WalletDoesNotExistError,
 )
@@ -90,37 +89,34 @@ class WalletSqlite(WalletRepository):
         from_wallet = self.get_wallet(from_user_id, from_wallet_id)
         to_wallet = self.get(to_wallet_id)
 
-        if from_wallet.get_balance() < transaction.get_amount():
-            raise NotEnoughBalanceError(from_wallet_id)
-        else:
-            connection = sqlite3.connect(self.db_path)
-            cursor = connection.cursor()
+        connection = sqlite3.connect(self.db_path)
+        cursor = connection.cursor()
 
-            amount = transaction.get_amount()
-            from_wallet_balance = from_wallet.get_balance()
-            to_wallet_balance = to_wallet.get_balance()
+        amount = transaction.get_amount()
+        from_wallet_balance = from_wallet.get_balance()
+        to_wallet_balance = to_wallet.get_balance()
 
-            cursor.execute(
-                "UPDATE wallets SET balance = ? WHERE public_key = ?",
-                (from_wallet_balance - amount, str(from_wallet_id)),
-            )
-            cursor.execute(
-                "UPDATE wallets SET balance = ? WHERE public_key = ?",
-                (to_wallet_balance + amount, str(to_wallet_id)),
-            )
-            cursor.execute(
-                "INSERT INTO wallets_transactions (wallet_key, transaction_key) "
-                "VALUES (?, ?)",
-                (str(from_wallet_id), str(transaction.get_key())),
-            )
-            cursor.execute(
-                "INSERT INTO wallets_transactions (wallet_key, transaction_key) "
-                "VALUES (?, ?)",
-                (str(to_wallet_id), str(transaction.get_key())),
-            )
+        cursor.execute(
+            "UPDATE wallets SET balance = ? WHERE public_key = ?",
+            (from_wallet_balance - amount, str(from_wallet_id)),
+        )
+        cursor.execute(
+            "UPDATE wallets SET balance = ? WHERE public_key = ?",
+            (to_wallet_balance + amount, str(to_wallet_id)),
+        )
+        cursor.execute(
+            "INSERT INTO wallets_transactions (wallet_key, transaction_key) "
+            "VALUES (?, ?)",
+            (str(from_wallet_id), str(transaction.get_key())),
+        )
+        cursor.execute(
+            "INSERT INTO wallets_transactions (wallet_key, transaction_key) "
+            "VALUES (?, ?)",
+            (str(to_wallet_id), str(transaction.get_key())),
+        )
 
-            connection.commit()
-            connection.close()
+        connection.commit()
+        connection.close()
 
         self.transactions.create(transaction)
 

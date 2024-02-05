@@ -153,9 +153,7 @@ def make_transaction(
         amount=amount,
     )
     transaction_statistic = TransactionStatistic(transaction_key=transaction.get_key())
-    new_amount = transaction_statistic.system_update(
-        from_wallet, to_wallet, amount)
-    transaction.update_amount(new_amount)
+    transaction_statistic.system_update(from_wallet, to_wallet, amount)
     try:
         wallets.add_transaction(transaction)
         transaction_statistics.create(transaction_statistic)

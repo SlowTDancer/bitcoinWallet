@@ -5,7 +5,6 @@ import pytest
 from constants import TEST_DB_PATH
 from core.errors import (
     InvalidOwnerError,
-    NotEnoughBalanceError,
     SameWalletsError,
     WalletDoesNotExistError,
 )
@@ -123,25 +122,6 @@ def test_wallet_repo_should_not_transaction_to_same_wallet(
         repo.add_transaction(transaction)
 
 
-def test_wallet_repo_should_not_transaction_more_than_balance(
-    repo: WalletRepository = WalletInMemory(),
-) -> None:
-    wallet1 = Wallet()
-    wallet2 = Wallet()
-    repo.create(wallet1)
-    repo.create(wallet2)
-
-    transaction = Transaction(
-        private_key=wallet1.get_private_key(),
-        to_key=wallet2.get_public_key(),
-        from_key=wallet1.get_public_key(),
-        amount=3.0,
-    )
-
-    with pytest.raises(NotEnoughBalanceError, match=str(wallet1.get_public_key())):
-        repo.add_transaction(transaction)
-
-
 def test_wallet_repo_add_and_get_transaction(
     repo: WalletRepository = WalletInMemory(),
 ) -> None:
@@ -198,12 +178,6 @@ def test_wallet_sqlite_should_not_get_unknown_wallet() -> None:
 def test_wallet_sqlite_should_not_transaction_to_same_wallet() -> None:
     repo = WalletSqlite(TEST_DB_PATH)
     test_wallet_repo_should_not_transaction_to_same_wallet(repo)
-    repo.clear()
-
-
-def test_wallet_sqlite_should_not_transaction_more_than_balance() -> None:
-    repo = WalletSqlite(TEST_DB_PATH)
-    test_wallet_repo_should_not_transaction_more_than_balance(repo)
     repo.clear()
 
 

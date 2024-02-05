@@ -3,6 +3,7 @@ from dataclasses import dataclass, field
 from uuid import UUID, uuid4
 
 from constants import TRANSFER_FEE
+from core.errors import NotEnoughBalanceError
 from core.repositories import RepositoryABC
 from core.wallet import Wallet
 
@@ -22,14 +23,13 @@ class TransactionStatistic:
     def get_profit(self) -> float:
         return self.profit
 
-    def system_update(
-        self, from_wallet: Wallet, to_wallet: Wallet, amount: float
-    ) -> float:
+    def system_update(self, from_wallet: Wallet, to_wallet: Wallet, transaction_amount: float) -> None:
         if from_wallet.get_private_key() != to_wallet.get_private_key():
-            self.profit = TRANSFER_FEE * amount
-            from_wallet.update_balance(-self.profit)
-            return amount - self.profit
-        return amount
+            self.profit = transaction_amount * TRANSFER_FEE
+        required_amount = transaction_amount + self.profit
+        if from_wallet.get_balance() <= required_amount:
+            raise NotEnoughBalanceError(from_wallet.get_public_key())
+        from_wallet.update_balance(-self.profit)
 
 
 @dataclass
