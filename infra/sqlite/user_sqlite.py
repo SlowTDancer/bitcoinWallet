@@ -92,6 +92,7 @@ class UserSqlite(UserRepository):
         if wallet_key in result_list:
             raise WalletAlreadyExistsError(wallet_key)
 
+        user.add_wallet(wallet_key)
         connection = sqlite3.connect(self.db_path)
         cursor = connection.cursor()
         cursor.execute(
