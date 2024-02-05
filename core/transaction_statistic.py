@@ -4,6 +4,7 @@ from uuid import UUID, uuid4
 
 from constants import TRANSFER_FEE
 from core.repositories import RepositoryABC
+from core.wallet import Wallet
 
 
 @dataclass
@@ -21,12 +22,13 @@ class TransactionStatistic:
     def get_profit(self) -> float:
         return self.profit
 
-    def calculate_profit(
-        self, from_wallet_key: UUID, to_wallet_key: UUID, amount: float
+    def system_update(
+        self, from_wallet: Wallet, to_wallet: Wallet, amount: float
     ) -> float:
-        if from_wallet_key != to_wallet_key:
+        if from_wallet.get_private_key() != to_wallet.get_private_key():
             self.profit = TRANSFER_FEE * amount
-            return amount - self.get_profit()
+            from_wallet.update_balance(-self.profit)
+            return amount - self.profit
         return amount
 
 

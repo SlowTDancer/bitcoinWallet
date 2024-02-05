@@ -153,9 +153,8 @@ def make_transaction(
         amount=amount,
     )
     transaction_statistic = TransactionStatistic(transaction_key=transaction.get_key())
-    new_amount = transaction_statistic.calculate_profit(
-        from_wallet.get_private_key(), to_wallet.get_private_key(), amount
-    )
+    new_amount = transaction_statistic.system_update(
+        from_wallet, to_wallet, amount)
     transaction.update_amount(new_amount)
     try:
         wallets.add_transaction(transaction)
