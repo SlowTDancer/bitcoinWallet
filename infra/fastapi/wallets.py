@@ -66,7 +66,7 @@ class WalletItemResponseEnvelope(BaseModel):
                     "example": {
                         "error": {
                             "message": "User's with email "
-                                       "<email> wallet quantity limit is reached."
+                            "<email> wallet quantity limit is reached."
                         }
                     }
                 }
@@ -114,7 +114,7 @@ def create_wallet(
             content={
                 "error": {
                     "message": f"User's with email <{user.get_email()}>"
-                               " wallet quantity limit is reached."
+                    " wallet quantity limit is reached."
                 }
             },
         )
@@ -152,7 +152,7 @@ def create_wallet(
                     "example": {
                         "error": {
                             "message": "Wallet with address <address>"
-                                       " does not belong to the correct owner."
+                            " does not belong to the correct owner."
                         }
                     }
                 }
@@ -203,7 +203,7 @@ def get_wallet_by_address(
             content={
                 "error": {
                     "message": f"Wallet with address <{address}>"
-                               " does not belong to the correct owner."
+                    " does not belong to the correct owner."
                 }
             },
         )
@@ -241,7 +241,7 @@ def get_wallet_by_address(
                     "example": {
                         "error": {
                             "message": "Wallet with address "
-                                       "<address> does not belong to the correct owner."
+                            "<address> does not belong to the correct owner."
                         }
                     }
                 }
@@ -287,7 +287,7 @@ def get_wallet_transactions(
             content={
                 "error": {
                     "message": f"Wallet with address <{address}>"
-                               " does not belong to the correct owner."
+                    " does not belong to the correct owner."
                 }
             },
         )
