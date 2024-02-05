@@ -117,7 +117,7 @@ def test_get_wallet_by_address_invalid_owner(client: TestClient) -> None:
     assert response.json() == {
         "error": {
             "message": f"Wallet with address <{str(public_key)}>"
-                       " does not belong to the correct owner."
+            " does not belong to the correct owner."
         }
     }
 
@@ -191,6 +191,6 @@ def test_get_wallet_transactions_invalid_owner(client: TestClient) -> None:
     assert response.json() == {
         "error": {
             "message": f"Wallet with address <{str(public_key)}>"
-                       " does not belong to the correct owner."
+            " does not belong to the correct owner."
         }
     }
