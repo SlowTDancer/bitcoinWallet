@@ -152,18 +152,14 @@ def make_transaction(
         to_key=request.to_key,
         amount=amount,
     )
-    transaction_statistic = TransactionStatistic(transaction.get_key())
+    transaction_statistic = TransactionStatistic(transaction_key=transaction.get_key())
     new_amount = transaction_statistic.calculate_profit(
         from_wallet.get_private_key(), to_wallet.get_private_key(), amount
     )
     transaction.update_amount(new_amount)
     try:
         wallets.add_transaction(transaction)
-        if (
-            transaction_statistic.get_profit() != 0.0
-        ):  # this is questionable weather i should count even 0 profits in
-            # statistics or not
-            transaction_statistics.create(transaction_statistic)
+        transaction_statistics.create(transaction_statistic)
         return {
             "transaction": TransactionItemResponse(
                 to_key=transaction.get_to_key(),
