@@ -58,12 +58,10 @@ class TransactionStatisticSqlite(TransactionStatisticRepository):
         connection = sqlite3.connect(self.db_path)
         cursor = connection.cursor()
         cursor.execute(
-            "SELECT COUNT(transaction_key), SUM(profit) FROM transaction_statistics",
+            "SELECT COUNT(transaction_key), ifnull(SUM(profit), 0) FROM transaction_statistics",
         )
         result = cursor.fetchone()
         connection.close()
-        if result is None:
-            return Statistics()
         return Statistics(int(result[0]), float(result[1]))
 
     def clear(self) -> None:
