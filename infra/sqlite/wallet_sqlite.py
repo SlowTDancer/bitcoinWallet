@@ -130,3 +130,4 @@ class WalletSqlite(WalletRepository):
             "wallets",
         )
         self.sqlite_database.clear(table_names)
+        self.transactions.clear()
