@@ -1,53 +1,44 @@
-import sqlite3
 import uuid
 from dataclasses import dataclass
 from uuid import UUID
 
-from constants import DB_PATH
 from core.errors import (
     UserAlreadyExistsError,
     UserDoesNotExistError,
     WalletAlreadyExistsError,
 )
 from core.user import User, UserRepository
+from infra.sqlite.database_sqlite import SqliteDatabase
 
 
 @dataclass
 class UserSqlite(UserRepository):
-    db_path: str = DB_PATH
+    sqlite_database: SqliteDatabase
 
     def create(self, user: User) -> None:
-        connection = sqlite3.connect(self.db_path)
-        cursor = connection.cursor()
-        cursor.execute(
-            "SELECT private_key FROM users WHERE email = ?", (user.get_email(),)
-        )
-        result = cursor.fetchone()
+        query = "SELECT private_key FROM users WHERE email = ?"
+        params = (user.get_email(),)
+
+        result = self.sqlite_database.fetch_one(query, params)
 
         if result is not None:
-            connection.close()
             raise UserAlreadyExistsError(user.get_email())
         email = user.get_email()
         private_key = str(user.get_private_key())
 
-        cursor.execute(
-            "INSERT INTO users (private_key, email) " "VALUES (?, ?);",
-            (
-                private_key,
-                email,
-            ),
+        query2 = "INSERT INTO users (private_key, email) " "VALUES (?, ?);"
+        params2 = (
+            private_key,
+            email,
         )
-        connection.commit()
-        connection.close()
+
+        self.sqlite_database.execute(query2, params2)
 
     def get(self, private_key: UUID) -> User:
-        connection = sqlite3.connect(self.db_path)
-        cursor = connection.cursor()
-        cursor.execute(
-            "SELECT email FROM users WHERE private_key = ?", (str(private_key),)
-        )
-        result = cursor.fetchone()
-        connection.close()
+        query = "SELECT email FROM users WHERE private_key = ?"
+        params = (str(private_key),)
+
+        result = self.sqlite_database.fetch_one(query, params)
 
         if result is None:
             raise UserDoesNotExistError(private_key)
@@ -59,25 +50,24 @@ class UserSqlite(UserRepository):
         return user
 
     def _get_by_email(self, email: str) -> User | None:
-        connection = sqlite3.connect(self.db_path)
-        cursor = connection.cursor()
-        cursor.execute("SELECT private_key FROM users WHERE email = ?", (email,))
-        result = cursor.fetchone()
+        query = "SELECT private_key FROM users WHERE email = ?"
+        params = (email,)
+
+        result = self.sqlite_database.fetch_one(query, params)
 
         if result is None:
-            connection.close()
             return None
         user_private_key = uuid.UUID(result[0])
-        cursor.execute(
-            "SELECT public_key FROM users_wallets WHERE private_key = ?",
-            (str(user_private_key),),
-        )
-        result = cursor.fetchall()
-        connection.close()
+
+        query2 = "SELECT public_key FROM users_wallets WHERE private_key = ?"
+        params2 = (str(user_private_key),)
+
+        result2 = self.sqlite_database.fetch_all(query2, params2)
+
         return (
             User(email, user_private_key)
-            if result is None
-            else User(email, user_private_key, [uuid.UUID(row[0]) for row in result])
+            if result2 is None
+            else User(email, user_private_key, [uuid.UUID(row[0]) for row in result2])
         )
 
     def add_wallet(self, user_key: UUID, wallet_key: UUID) -> None:
@@ -87,30 +77,18 @@ class UserSqlite(UserRepository):
             raise WalletAlreadyExistsError(wallet_key)
 
         user.add_wallet(wallet_key)
-        connection = sqlite3.connect(self.db_path)
-        cursor = connection.cursor()
-        cursor.execute(
-            "INSERT INTO users_wallets (private_key, public_key) " "VALUES (?, ?);",
-            (
-                str(user_key),
-                str(wallet_key),
-            ),
+
+        query = "INSERT INTO users_wallets (private_key, public_key) " "VALUES (?, ?);"
+        params = (
+            str(user_key),
+            str(wallet_key),
         )
-        connection.commit()
-        connection.close()
+
+        self.sqlite_database.execute(query, params)
 
     def clear(self) -> None:
-        connection = sqlite3.connect(self.db_path)
-        cursor = connection.cursor()
-
-        cursor.execute("SELECT COUNT(*) FROM users")
-        count = cursor.fetchone()[0]
-        if count != 0:
-            cursor.execute("DELETE FROM users")
-            connection.commit()
-        cursor.execute("SELECT COUNT(*) FROM users_wallets")
-        count = cursor.fetchone()[0]
-        if count != 0:
-            cursor.execute("DELETE FROM users_wallets")
-            connection.commit()
-        connection.close()
+        table_names = (
+            "users_wallets",
+            "users",
+        )
+        self.sqlite_database.clear(table_names)

@@ -7,6 +7,7 @@ from core.errors import InvalidOwnerError, SameWalletsError, WalletDoesNotExistE
 from core.transaction import Transaction
 from core.wallet import Wallet, WalletRepository
 from infra.in_memory.wallet_in_memory import WalletInMemory
+from infra.sqlite.database_sqlite import SqliteDatabase
 from infra.sqlite.wallet_sqlite import WalletSqlite
 
 
@@ -142,42 +143,49 @@ def test_wallet_repo_add_and_get_transaction(
 
 
 def test_wallet_sqlite_create_and_get() -> None:
-    repo = WalletSqlite(TEST_DB_PATH)
+    sqlite_database = SqliteDatabase(TEST_DB_PATH)
+    repo = WalletSqlite(sqlite_database)
     test_wallet_repo_create_and_get(repo)
     repo.clear()
 
 
 def test_wallet_sqlite_should_not_get_unknown() -> None:
-    repo = WalletSqlite(TEST_DB_PATH)
+    sqlite_database = SqliteDatabase(TEST_DB_PATH)
+    repo = WalletSqlite(sqlite_database)
     test_wallet_repo_should_not_get_unknown(repo)
     repo.clear()
 
 
 def test_wallet_sqlite_get_wallet() -> None:
-    repo = WalletSqlite(TEST_DB_PATH)
+    sqlite_database = SqliteDatabase(TEST_DB_PATH)
+    repo = WalletSqlite(sqlite_database)
     test_wallet_repo_get_wallet(repo)
     repo.clear()
 
 
 def test_wallet_sqlite_should_not_get_wallet_of_diff_user() -> None:
-    repo = WalletSqlite(TEST_DB_PATH)
+    sqlite_database = SqliteDatabase(TEST_DB_PATH)
+    repo = WalletSqlite(sqlite_database)
     test_wallet_repo_should_not_get_wallet_of_diff_user(repo)
     repo.clear()
 
 
 def test_wallet_sqlite_should_not_get_unknown_wallet() -> None:
-    repo = WalletSqlite(TEST_DB_PATH)
+    sqlite_database = SqliteDatabase(TEST_DB_PATH)
+    repo = WalletSqlite(sqlite_database)
     test_wallet_repo_should_not_get_unknown_wallet(repo)
     repo.clear()
 
 
 def test_wallet_sqlite_should_not_transaction_to_same_wallet() -> None:
-    repo = WalletSqlite(TEST_DB_PATH)
+    sqlite_database = SqliteDatabase(TEST_DB_PATH)
+    repo = WalletSqlite(sqlite_database)
     test_wallet_repo_should_not_transaction_to_same_wallet(repo)
     repo.clear()
 
 
 def test_wallet_sqlite_add_and_get_transaction() -> None:
-    repo = WalletSqlite(TEST_DB_PATH)
+    sqlite_database = SqliteDatabase(TEST_DB_PATH)
+    repo = WalletSqlite(sqlite_database)
     test_wallet_repo_add_and_get_transaction(repo)
     repo.clear()

@@ -6,6 +6,7 @@ from constants import TEST_DB_PATH
 from core.errors import TransactionDoesNotExistError
 from core.transaction import Transaction, TransactionRepository
 from infra.in_memory.transaction_in_memory import TransactionInMemory
+from infra.sqlite.database_sqlite import SqliteDatabase
 from infra.sqlite.transaction_sqlite import TransactionSqlite
 
 
@@ -58,6 +59,7 @@ def test_transaction_repository(
 
 
 def test_transaction_sqlite() -> None:
-    repo = TransactionSqlite(TEST_DB_PATH)
+    sqlite_database = SqliteDatabase(TEST_DB_PATH)
+    repo = TransactionSqlite(sqlite_database)
     test_transaction_repository(repo)
     repo.clear()

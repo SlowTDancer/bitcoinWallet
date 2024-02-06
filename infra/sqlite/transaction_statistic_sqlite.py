@@ -1,50 +1,44 @@
-import sqlite3
 from dataclasses import dataclass
 from uuid import UUID
 
-from constants import DB_PATH
 from core.errors import TransactionStatisticDoesNotExistError
 from core.transaction_statistic import (
     Statistics,
     TransactionStatistic,
     TransactionStatisticRepository,
 )
+from infra.sqlite.database_sqlite import SqliteDatabase
 
 
 @dataclass
 class TransactionStatisticSqlite(TransactionStatisticRepository):
-    db_path: str = DB_PATH
+    sqlite_database: SqliteDatabase
 
     def create(self, statistic: TransactionStatistic) -> None:
-        connection = sqlite3.connect(self.db_path)
-        cursor = connection.cursor()
-
         key = str(statistic.get_key())
         transaction_key = str(statistic.get_transaction_key())
         profit = statistic.get_profit()
-        cursor.execute(
+
+        query = (
             "INSERT INTO transaction_statistics (key, transaction_key, profit) "
-            "VALUES (?, ?, ?);",
-            (
-                key,
-                transaction_key,
-                profit,
-            ),
+            "VALUES (?, ?, ?);"
         )
-        connection.commit()
-        connection.close()
+        params = (
+            key,
+            transaction_key,
+            profit,
+        )
+
+        self.sqlite_database.execute(query, params)
 
     def get(self, key: UUID) -> TransactionStatistic:
-        connection = sqlite3.connect(self.db_path)
-        cursor = connection.cursor()
-
-        cursor.execute(
+        query = (
             "SELECT transaction_key, profit FROM transaction_statistics"
-            " WHERE key = ?",
-            (str(key),),
+            " WHERE key = ?"
         )
-        result = cursor.fetchone()
-        connection.close()
+        params = (str(key),)
+
+        result = self.sqlite_database.fetch_one(query, params)
 
         if result is None:
             raise TransactionStatisticDoesNotExistError(key)
@@ -55,23 +49,15 @@ class TransactionStatisticSqlite(TransactionStatisticRepository):
         )
 
     def get_statistics(self) -> Statistics:
-        connection = sqlite3.connect(self.db_path)
-        cursor = connection.cursor()
-        cursor.execute(
+        query = (
             "SELECT COUNT(transaction_key), ifnull(SUM(profit), 0) "
-            "FROM transaction_statistics",
+            "FROM transaction_statistics"
         )
-        result = cursor.fetchone()
-        connection.close()
+        params = ()
+
+        result = self.sqlite_database.fetch_one(query, params)
         return Statistics(int(result[0]), int(result[1]))
 
     def clear(self) -> None:
-        connection = sqlite3.connect(self.db_path)
-        cursor = connection.cursor()
-
-        cursor.execute("SELECT COUNT(*) FROM transaction_statistics")
-        count = cursor.fetchone()[0]
-        if count != 0:
-            cursor.execute("DELETE FROM transaction_statistics")
-            connection.commit()
-        connection.close()
+        table_names = ("transaction_statistics",)
+        self.sqlite_database.clear(table_names)

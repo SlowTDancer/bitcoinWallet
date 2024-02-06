@@ -13,6 +13,7 @@ from core.transaction_statistic import (
 from core.wallet import Wallet
 from infra.in_memory.transaction_statistic_in_memory import TransactionStatisticInMemory
 from infra.in_memory.wallet_in_memory import WalletInMemory
+from infra.sqlite.database_sqlite import SqliteDatabase
 from infra.sqlite.transaction_statistic_sqlite import TransactionStatisticSqlite
 
 
@@ -137,24 +138,28 @@ def test_transaction_statistic_repo_get_statistics(
 
 
 def test_transaction_statistic_sqlite_get_statistics_create_and_get() -> None:
-    repo = TransactionStatisticSqlite(TEST_DB_PATH)
+    sqlite_database = SqliteDatabase(TEST_DB_PATH)
+    repo = TransactionStatisticSqlite(sqlite_database)
     test_transaction_statistic_repo_create_and_get(repo)
     repo.clear()
 
 
 def test_transaction_statistic_sqlite_get_statistics_on_empty() -> None:
-    repo = TransactionStatisticSqlite(TEST_DB_PATH)
+    sqlite_database = SqliteDatabase(TEST_DB_PATH)
+    repo = TransactionStatisticSqlite(sqlite_database)
     test_transaction_statistic_repo_get_statistics_on_empty(repo)
     repo.clear()
 
 
 def test_transaction_statistic_sqlite_get_statistics() -> None:
-    repo = TransactionStatisticSqlite(TEST_DB_PATH)
+    sqlite_database = SqliteDatabase(TEST_DB_PATH)
+    repo = TransactionStatisticSqlite(sqlite_database)
     test_transaction_statistic_repo_get_statistics(repo)
     repo.clear()
 
 
 def test_transaction_statistic_sqlite_should_not_get_unknown() -> None:
-    repo = TransactionStatisticSqlite(TEST_DB_PATH)
+    sqlite_database = SqliteDatabase(TEST_DB_PATH)
+    repo = TransactionStatisticSqlite(sqlite_database)
     test_transaction_statistic_repo_should_not_get_unknown(repo)
     repo.clear()

@@ -11,6 +11,7 @@ from core.errors import (
 )
 from core.user import User, UserRepository
 from infra.in_memory.user_in_memory import UserInMemory
+from infra.sqlite.database_sqlite import SqliteDatabase
 from infra.sqlite.user_sqlite import UserSqlite
 
 
@@ -100,12 +101,14 @@ def test_user_in_memory_add_wallet(repo: UserRepository = UserInMemory()) -> Non
 
 
 def test_user_sqlite_create_and_get() -> None:
-    repo = UserSqlite(TEST_DB_PATH)
+    sqlite_database = SqliteDatabase(TEST_DB_PATH)
+    repo = UserSqlite(sqlite_database)
     test_user_in_memory_create_and_get(repo)
     repo.clear()
 
 
 def test_user_sqlite_add_wallet() -> None:
-    repo = UserSqlite(TEST_DB_PATH)
+    sqlite_database = SqliteDatabase(TEST_DB_PATH)
+    repo = UserSqlite(sqlite_database)
     test_user_in_memory_add_wallet(repo)
     repo.clear()

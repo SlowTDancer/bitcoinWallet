@@ -1,51 +1,42 @@
-import sqlite3
 from dataclasses import dataclass
 from uuid import UUID
 
-from constants import DB_PATH
 from core.errors import TransactionDoesNotExistError
 from core.transaction import Transaction, TransactionRepository
+from infra.sqlite.database_sqlite import SqliteDatabase
 
 
 @dataclass
 class TransactionSqlite(TransactionRepository):
-    db_path: str = DB_PATH
+    sqlite_database: SqliteDatabase
 
     def create(self, transaction: Transaction) -> None:
-        connection = sqlite3.connect(self.db_path)
-        cursor = connection.cursor()
-
         key = str(transaction.get_key())
         to_key = str(transaction.get_to_key())
         private_key = str(transaction.get_private_key())
         from_key = str(transaction.get_from_key())
         amount = transaction.get_amount()
 
-        cursor.execute(
+        query = (
             "INSERT INTO transactions (key, to_key, private_key, from_key, amount) "
-            "VALUES (?, ?, ?, ?, ?);",
-            (
-                key,
-                to_key,
-                private_key,
-                from_key,
-                amount,
-            ),
+            "VALUES (?, ?, ?, ?, ?);"
         )
-        connection.commit()
-        connection.close()
+        params = (
+            key,
+            to_key,
+            private_key,
+            from_key,
+            amount,
+        )
+        self.sqlite_database.execute(query, params)
 
     def get(self, transaction_key: UUID) -> Transaction:
-        connection = sqlite3.connect(self.db_path)
-        cursor = connection.cursor()
-
-        cursor.execute(
-            "SELECT to_key, private_key, from_key, amount FROM transactions"
-            " WHERE key = ?",
-            (str(transaction_key),),
+        query = (
+            "SELECT to_key, private_key, from_key, amount"
+            " FROM transactions WHERE key = ?"
         )
-        result = cursor.fetchone()
-        connection.close()
+        params = (str(transaction_key),)
+        result = self.sqlite_database.fetch_one(query, params)
 
         if result is None:
             raise TransactionDoesNotExistError(transaction_key)
@@ -58,12 +49,5 @@ class TransactionSqlite(TransactionRepository):
         )
 
     def clear(self) -> None:
-        connection = sqlite3.connect(self.db_path)
-        cursor = connection.cursor()
-
-        cursor.execute("SELECT COUNT(*) FROM transactions")
-        count = cursor.fetchone()[0]
-        if count != 0:
-            cursor.execute("DELETE FROM transactions")
-            connection.commit()
-        connection.close()
+        table_names = ("transactions",)
+        self.sqlite_database.clear(table_names)
