@@ -1,8 +1,6 @@
 import uuid
-
 import pytest
 from fastapi.testclient import TestClient
-
 from constants import BITCOIN
 from runner.setup import init_app
 
@@ -12,7 +10,7 @@ def client() -> TestClient:
     return TestClient(init_app())
 
 
-def test_make_transaction_success(client: TestClient) -> None:
+def create_user_and_wallets(client: TestClient) -> tuple:
     email = "test@example.com"
     user_request_data = {"email": email}
 
@@ -21,6 +19,11 @@ def test_make_transaction_success(client: TestClient) -> None:
     wallet_response1 = client.post("/wallets", headers=user_response.json()["user"])
     wallet_response2 = client.post("/wallets", headers=user_response.json()["user"])
 
+    return user_response, wallet_response1, wallet_response2
+
+
+def test_make_transaction_success(client: TestClient) -> None:
+    user_response, wallet_response1, wallet_response2 = create_user_and_wallets(client)
     public_key1 = wallet_response1.json()["wallet"]["public_key"]
     public_key2 = wallet_response2.json()["wallet"]["public_key"]
 
@@ -56,11 +59,7 @@ def test_make_transaction_user_does_not_exist(client: TestClient) -> None:
 
 
 def test_make_transaction_wallet_does_not_exist(client: TestClient) -> None:
-    email = "test@example.com"
-    user_request_data = {"email": email}
-
-    user_response = client.post("/users", json=user_request_data)
-
+    user_response, _, _ = create_user_and_wallets(client)
     wallet_address = str(uuid.uuid4())
 
     transaction_request_data = {
@@ -82,13 +81,7 @@ def test_make_transaction_wallet_does_not_exist(client: TestClient) -> None:
 
 
 def test_make_transaction_same_wallets(client: TestClient) -> None:
-    email = "test@example.com"
-    user_request_data = {"email": email}
-
-    user_response = client.post("/users", json=user_request_data)
-
-    wallet_response = client.post("/wallets", headers=user_response.json()["user"])
-
+    user_response, wallet_response, _ = create_user_and_wallets(client)
     public_key = wallet_response.json()["wallet"]["public_key"]
 
     transaction_request_data = {
@@ -111,20 +104,12 @@ def test_make_transaction_same_wallets(client: TestClient) -> None:
 
 
 def test_make_transaction_not_enough_balance(client: TestClient) -> None:
-    email = "test@example.com"
-    user_request_data = {"email": email}
-
-    user_response = client.post("/users", json=user_request_data)
-
-    wallet_response1 = client.post("/wallets", headers=user_response.json()["user"])
-    wallet_response2 = client.post("/wallets", headers=user_response.json()["user"])
-
+    user_response, wallet_response1, wallet_response2 = create_user_and_wallets(client)
     public_key1 = wallet_response1.json()["wallet"]["public_key"]
-    public_key2 = wallet_response2.json()["wallet"]["public_key"]
 
     transaction_request_data = {
         "from_key": public_key1,
-        "to_key": public_key2,
+        "to_key": wallet_response2.json()["wallet"]["public_key"],
         "amount": 100 * BITCOIN,
     }
     response = client.post(
@@ -141,20 +126,12 @@ def test_make_transaction_not_enough_balance(client: TestClient) -> None:
 
 
 def test_can_not_make_non_positive_transaction(client: TestClient) -> None:
-    email = "test@example.com"
-    user_request_data = {"email": email}
-
-    user_response = client.post("/users", json=user_request_data)
-
-    wallet_response1 = client.post("/wallets", headers=user_response.json()["user"])
-    wallet_response2 = client.post("/wallets", headers=user_response.json()["user"])
-
+    user_response, wallet_response1, wallet_response2 = create_user_and_wallets(client)
     public_key1 = wallet_response1.json()["wallet"]["public_key"]
-    public_key2 = wallet_response2.json()["wallet"]["public_key"]
 
     transaction_request_data = {
         "from_key": public_key1,
-        "to_key": public_key2,
+        "to_key": wallet_response2.json()["wallet"]["public_key"],
         "amount": 0,
     }
     response = client.post(
@@ -171,10 +148,7 @@ def test_can_not_make_non_positive_transaction(client: TestClient) -> None:
 
 
 def test_get_transactions_success(client: TestClient) -> None:
-    email = "test@example.com"
-    user_request_data = {"email": email}
-
-    user_response = client.post("/users", json=user_request_data)
+    user_response, _, _ = create_user_and_wallets(client)
 
     response = client.get("/transactions", headers=user_response.json()["user"])
 
