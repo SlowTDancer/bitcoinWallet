@@ -11,6 +11,7 @@ from core.transaction_statistic import (
 )
 from core.wallet import Wallet
 from infra.in_memory.transaction_statistic_in_memory import TransactionStatisticInMemory
+from infra.in_memory.wallet_in_memory import WalletInMemory
 from infra.sqlite.transaction_statistic_sqlite import TransactionStatisticSqlite
 
 
@@ -27,44 +28,53 @@ def test_transaction_statistic_get() -> None:
     transaction_key = uuid4()
     profit = 1.25
 
-    transaction_statistic = TransactionStatistic(key, transaction_key, profit)
+    transaction_statistic = TransactionStatistic(
+        key=key, transaction_key=transaction_key, profit=profit
+    )
     assert transaction_statistic.get_key() == key
     assert transaction_statistic.get_transaction_key() == transaction_key
     assert transaction_statistic.get_profit() == profit
 
 
 def test_transaction_statistic_system_update_same_user_wallets() -> None:
+    wallets = WalletInMemory()
     transaction_statistic = TransactionStatistic()
     user_key = uuid4()
     balance = 150
     from_wallet = Wallet(private_key=user_key, balance=balance)
     to_wallet = Wallet(private_key=user_key, balance=0.0)
+    wallets.create(from_wallet)
+    wallets.create(to_wallet)
     amount = 100
-    transaction_statistic.system_update(from_wallet, to_wallet, amount)
+    transaction_statistic.system_update(wallets, from_wallet, to_wallet, amount)
     assert transaction_statistic.get_profit() == 0.0
-    assert from_wallet.get_balance() == balance
+    assert wallets.get(from_wallet.get_public_key()).get_balance() == balance
 
 
 def test_transaction_statistic_system_update_different_user_wallets() -> None:
+    wallets = WalletInMemory()
     transaction_statistic = TransactionStatistic()
     balance = 150
     from_wallet = Wallet(balance=balance)
     to_wallet = Wallet()
+    wallets.create(from_wallet)
+    wallets.create(to_wallet)
     amount = 100
-    transaction_statistic.system_update(from_wallet, to_wallet, amount)
+    transaction_statistic.system_update(wallets, from_wallet, to_wallet, amount)
     profit = amount * TRANSFER_FEE
-    assert from_wallet.get_balance() == (balance - profit)
+    assert wallets.get(from_wallet.get_public_key()).get_balance() == (balance - profit)
     assert transaction_statistic.get_profit() == profit
 
 
 def test_transaction_statistic_system_update_not_enough_balance() -> None:
+    wallets = WalletInMemory()
     transaction_statistic = TransactionStatistic()
     balance = 10
     from_wallet = Wallet(balance=balance)
     to_wallet = Wallet()
     amount = 100
     with pytest.raises(NotEnoughBalanceError, match=str(from_wallet.get_public_key())):
-        transaction_statistic.system_update(from_wallet, to_wallet, amount)
+        transaction_statistic.system_update(wallets, from_wallet, to_wallet, amount)
 
 
 def test_statistics_create() -> None:

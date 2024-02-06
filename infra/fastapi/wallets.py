@@ -36,6 +36,15 @@ class TransactionItemResponse(BaseModel):
     from_key: UUID
     amount: float
 
+    def __eq__(self, other: Any) -> bool:
+        if isinstance(other, TransactionItemResponse):
+            return (
+                self.to_key == other.to_key
+                and self.from_key == other.from_key
+                and self.amount == other.amount
+            )
+        return False
+
 
 class TransactionItemResponseEnvelope(BaseModel):
     transaction: TransactionItemResponse

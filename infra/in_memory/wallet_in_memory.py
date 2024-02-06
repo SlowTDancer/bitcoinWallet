@@ -19,6 +19,11 @@ class WalletInMemory(WalletRepository):
         except KeyError:
             raise WalletDoesNotExistError(wallet_key)
 
+    def update_balance(self, wallet_key: UUID, amount: float) -> None:
+        wallet = self.get(wallet_key)
+        wallet.update_balance(amount)
+        self.wallets[wallet_key] = wallet
+
     def get_wallet(self, user_key: UUID, wallet_key: UUID) -> Wallet:
         try:
             wallet = self.wallets[wallet_key]

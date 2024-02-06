@@ -75,6 +75,21 @@ class WalletSqlite(WalletRepository):
 
         return Wallet(wallet_key, private_key, balance, transactions)
 
+    def update_balance(self, wallet_key: UUID, amount: float) -> None:
+        wallet = self.get(wallet_key)
+        balance = wallet.get_balance()
+
+        connection = sqlite3.connect(self.db_path)
+        cursor = connection.cursor()
+
+        cursor.execute(
+            "UPDATE wallets SET balance = ? WHERE public_key = ?",
+            (balance + amount, str(wallet_key)),
+        )
+
+        connection.commit()
+        connection.close()
+
     def add_transaction(self, transaction: Transaction) -> None:
         from_user_id = transaction.get_private_key()
         from_wallet_id = transaction.get_from_key()

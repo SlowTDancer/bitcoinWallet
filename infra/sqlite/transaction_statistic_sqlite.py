@@ -49,9 +49,9 @@ class TransactionStatisticSqlite(TransactionStatisticRepository):
         if result is None:
             raise TransactionStatisticDoesNotExistError(key)
         return TransactionStatistic(
-            key,
-            UUID(result[0]),
-            result[1],
+            key=key,
+            transaction_key=UUID(result[0]),
+            profit=result[1],
         )
 
     def get_statistics(self) -> Statistics:

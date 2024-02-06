@@ -120,7 +120,7 @@ def make_transaction(
         transaction_statistic = TransactionStatistic(
             transaction_key=transaction.get_key()
         )
-        transaction_statistic.system_update(from_wallet, to_wallet, amount)
+        transaction_statistic.system_update(wallets, from_wallet, to_wallet, amount)
 
         wallets.add_transaction(transaction)
         transaction_statistics.create(transaction_statistic)
@@ -179,6 +179,11 @@ def get_transactions(
     user_transactions = [
         wallets.get_transactions(api_key, wallet_id) for wallet_id in wallet_ids
     ]
+    transactions = []
+    for wallet_transactions in user_transactions:
+        for transaction in wallet_transactions:
+            if transaction not in transactions:
+                transactions.append(transaction)
     return {
         "transactions": [
             TransactionItemResponse(
@@ -186,7 +191,6 @@ def get_transactions(
                 from_key=transaction.get_from_key(),
                 amount=transaction.get_amount(),
             )
-            for wallet_transactions in user_transactions
-            for transaction in wallet_transactions
+            for transaction in transactions
         ]
     }

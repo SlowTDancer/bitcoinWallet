@@ -30,4 +30,6 @@ def test_get_statistics_invalid_admin_key(client: TestClient) -> None:
     response = client.get("/statistics", headers={"api_key": str(invalid_api_key)})
 
     assert response.status_code == 401
-    assert response.json() == {"error": {"message": f"Invalid admin API key <{invalid_api_key}>"}}
+    assert response.json() == {
+        "error": {"message": f"Invalid admin API key <{invalid_api_key}>"}
+    }

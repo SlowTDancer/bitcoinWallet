@@ -45,6 +45,10 @@ class WalletRepository(RepositoryABC[Wallet]):
         pass
 
     @abstractmethod
+    def update_balance(self, wallet_key: UUID, amount: float) -> None:
+        pass
+
+    @abstractmethod
     def add_transaction(self, transaction: Transaction) -> None:
         pass
 
