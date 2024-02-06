@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from decimal import Context, ROUND_DOWN
 from math import ceil
 from uuid import UUID
 
@@ -100,7 +101,8 @@ def make_transaction(
             },
         )
 
-    amount = request.amount
+    context = Context(prec=16, rounding=ROUND_DOWN)
+    amount = context.create_decimal_from_float(request.amount)
     satoshi_amount = amount * BITCOIN
 
     if satoshi_amount < 1 or (satoshi_amount != ceil(satoshi_amount)):
