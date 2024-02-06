@@ -94,27 +94,19 @@ class WalletSqlite(WalletRepository):
         from_user_id = transaction.get_private_key()
         from_wallet_id = transaction.get_from_key()
         to_wallet_id = transaction.get_to_key()
+
         if from_wallet_id == to_wallet_id:
             raise SameWalletsError(from_wallet_id)
 
-        from_wallet = self.get_wallet(from_user_id, from_wallet_id)
-        to_wallet = self.get(to_wallet_id)
+        self.get_wallet(from_user_id, from_wallet_id)
+        amount = transaction.get_amount()
+
+        self.update_balance(from_wallet_id, -amount)
+        self.update_balance(to_wallet_id, amount)
 
         connection = sqlite3.connect(self.db_path)
         cursor = connection.cursor()
 
-        amount = transaction.get_amount()
-        from_wallet_balance = from_wallet.get_balance()
-        to_wallet_balance = to_wallet.get_balance()
-
-        cursor.execute(
-            "UPDATE wallets SET balance = ? WHERE public_key = ?",
-            (from_wallet_balance - amount, str(from_wallet_id)),
-        )
-        cursor.execute(
-            "UPDATE wallets SET balance = ? WHERE public_key = ?",
-            (to_wallet_balance + amount, str(to_wallet_id)),
-        )
         cursor.execute(
             "INSERT INTO wallets_transactions (wallet_key, transaction_key) "
             "VALUES (?, ?)",

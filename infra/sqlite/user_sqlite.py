@@ -50,19 +50,9 @@ class UserSqlite(UserRepository):
         if result is None:
             connection.close()
             raise UserDoesNotExistError(private_key)
-        email = str(result[0])
-        cursor.execute(
-            "SELECT public_key FROM users_wallets WHERE private_key = ?",
-            (str(private_key),),
-        )
-        result = cursor.fetchall()
         connection.close()
-
-        return (
-            User(email, private_key)
-            if result is None
-            else User(email, private_key, [uuid.UUID(row[0]) for row in result])
-        )
+        email = str(result[0])
+        return self._get_by_email(email)
 
     def _get_by_email(self, email: str) -> User | None:
         connection = sqlite3.connect(self.db_path)
