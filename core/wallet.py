@@ -2,6 +2,7 @@ from abc import abstractmethod
 from dataclasses import dataclass, field
 from uuid import UUID, uuid4
 
+from constants import BITCOIN
 from core.repositories import RepositoryABC
 from core.transaction import Transaction
 
@@ -10,7 +11,7 @@ from core.transaction import Transaction
 class Wallet:
     public_key: UUID = field(default_factory=uuid4)
     private_key: UUID = field(default_factory=uuid4)
-    balance: float = 1.0
+    balance: int = BITCOIN
     transactions: dict[UUID, Transaction] = field(default_factory=dict)
 
     def get_public_key(self) -> UUID:
@@ -19,7 +20,7 @@ class Wallet:
     def get_private_key(self) -> UUID:
         return self.private_key
 
-    def get_balance(self) -> float:
+    def get_balance(self) -> int:
         return self.balance
 
     def get_transactions(self) -> list[Transaction]:
@@ -27,7 +28,7 @@ class Wallet:
             return []
         return list(self.transactions.values())
 
-    def update_balance(self, amount: float) -> None:
+    def update_balance(self, amount: int) -> None:
         self.balance += amount
 
     def add_transaction(self, transaction: Transaction) -> None:
@@ -45,7 +46,7 @@ class WalletRepository(RepositoryABC[Wallet]):
         pass
 
     @abstractmethod
-    def update_balance(self, wallet_key: UUID, amount: float) -> None:
+    def update_balance(self, wallet_key: UUID, amount: int) -> None:
         pass
 
     @abstractmethod

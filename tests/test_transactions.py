@@ -13,12 +13,12 @@ def test_transaction_create() -> None:
     to_key = uuid4()
     from_key = uuid4()
     private_key = uuid4()
-    amount = 2.6
+    amount = 3
     transaction = Transaction(
         from_key=from_key, to_key=to_key, amount=amount, private_key=private_key
     )
     assert isinstance(transaction.get_key(), UUID)
-    assert isinstance(transaction.get_amount(), float)
+    assert isinstance(transaction.get_amount(), int)
     assert isinstance(transaction.get_private_key(), UUID)
     assert isinstance(transaction.get_to_key(), UUID)
     assert isinstance(transaction.get_from_key(), UUID)
@@ -28,7 +28,7 @@ def test_transaction_get() -> None:
     to_key = uuid4()
     from_key = uuid4()
     private_key = uuid4()
-    amount = 3.1
+    amount = 3
     transaction = Transaction(
         from_key=from_key, to_key=to_key, amount=amount, private_key=private_key
     )

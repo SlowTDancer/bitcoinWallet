@@ -17,7 +17,7 @@ cursor.execute(
         [to_key] TEXT,
         [private_key] TEXT,
         [from_key] TEXT,
-        [amount] FLOAT
+        [amount] INT
     );
 """
 )
@@ -27,7 +27,7 @@ cursor.execute(
     CREATE TABLE IF NOT EXISTS wallets (
         [public_key] TEXT PRIMARY KEY,
         [private_key] TEXT,
-        [balance] FLOAT
+        [balance] INT
     );
 """
 )
@@ -64,7 +64,7 @@ cursor.execute(
     CREATE TABLE IF NOT EXISTS transaction_statistics (
         [key] TEXT PRIMARY KEY,
         [transaction_key] TEXT UNIQUE,
-        [profit] FLOAT
+        [profit] INT
     );
 """
 )

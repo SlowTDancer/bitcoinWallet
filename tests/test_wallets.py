@@ -15,14 +15,14 @@ def test_wallet_create() -> None:
 
     assert isinstance(wallet.get_public_key(), UUID)
     assert isinstance(wallet.get_private_key(), UUID)
-    assert isinstance(wallet.get_balance(), float)
+    assert isinstance(wallet.get_balance(), int)
     assert isinstance(wallet.get_transactions(), list)
 
 
 def test_wallet_get() -> None:
     public_key = uuid4()
     private_key = uuid4()
-    balance = 2.4
+    balance = 3
 
     wallet = Wallet(public_key, private_key, balance)
 
@@ -35,10 +35,10 @@ def test_wallet_get() -> None:
 def test_wallet_update_balance() -> None:
     public_key = uuid4()
     private_key = uuid4()
-    balance = 2.5
+    balance = 3
 
     wallet = Wallet(public_key, private_key, balance)
-    add_amount = 4.0
+    add_amount = 4
     wallet.update_balance(add_amount)
     assert wallet.get_balance() == balance + add_amount
 
@@ -46,7 +46,7 @@ def test_wallet_update_balance() -> None:
 def test_wallet_add_transaction() -> None:
     public_key = uuid4()
     private_key = uuid4()
-    balance = 2.5
+    balance = 3
 
     wallet = Wallet(public_key, private_key, balance)
     assert len(wallet.get_transactions()) == 0
@@ -121,7 +121,7 @@ def test_wallet_repo_should_not_transaction_to_same_wallet(
 def test_wallet_repo_add_and_get_transaction(
     repo: WalletRepository = WalletInMemory(),
 ) -> None:
-    wallet1 = Wallet(balance=5.0)
+    wallet1 = Wallet(balance=5)
     wallet2 = Wallet()
     repo.create(wallet1)
     repo.create(wallet2)
@@ -134,7 +134,7 @@ def test_wallet_repo_add_and_get_transaction(
         private_key=user_key,
         to_key=wallet2.get_public_key(),
         from_key=from_key,
-        amount=3.0,
+        amount=3,
     )
 
     repo.add_transaction(transaction)

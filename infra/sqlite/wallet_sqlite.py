@@ -75,7 +75,7 @@ class WalletSqlite(WalletRepository):
 
         return Wallet(wallet_key, private_key, balance, transactions)
 
-    def update_balance(self, wallet_key: UUID, amount: float) -> None:
+    def update_balance(self, wallet_key: UUID, amount: int) -> None:
         wallet = self.get(wallet_key)
         balance = wallet.get_balance()
 

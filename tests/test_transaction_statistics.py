@@ -1,3 +1,4 @@
+from math import ceil
 from uuid import UUID, uuid4
 
 import pytest
@@ -20,13 +21,13 @@ def test_transaction_statistic_create() -> None:
 
     assert isinstance(transaction_statistic.get_key(), UUID)
     assert isinstance(transaction_statistic.get_transaction_key(), UUID)
-    assert isinstance(transaction_statistic.get_profit(), float)
+    assert isinstance(transaction_statistic.get_profit(), int)
 
 
 def test_transaction_statistic_get() -> None:
     key = uuid4()
     transaction_key = uuid4()
-    profit = 1.25
+    profit = 2
 
     transaction_statistic = TransactionStatistic(
         key=key, transaction_key=transaction_key, profit=profit
@@ -42,7 +43,7 @@ def test_transaction_statistic_system_update_same_user_wallets() -> None:
     user_key = uuid4()
     balance = 150
     from_wallet = Wallet(private_key=user_key, balance=balance)
-    to_wallet = Wallet(private_key=user_key, balance=0.0)
+    to_wallet = Wallet(private_key=user_key, balance=0)
     wallets.create(from_wallet)
     wallets.create(to_wallet)
     amount = 100
@@ -61,7 +62,7 @@ def test_transaction_statistic_system_update_different_user_wallets() -> None:
     wallets.create(to_wallet)
     amount = 100
     transaction_statistic.system_update(wallets, from_wallet, to_wallet, amount)
-    profit = amount * TRANSFER_FEE
+    profit = ceil(amount * TRANSFER_FEE)
     assert wallets.get(from_wallet.get_public_key()).get_balance() == (balance - profit)
     assert transaction_statistic.get_profit() == profit
 
@@ -80,12 +81,12 @@ def test_transaction_statistic_system_update_not_enough_balance() -> None:
 def test_statistics_create() -> None:
     statistic = Statistics()
 
-    assert isinstance(statistic.get_platform_profit(), float)
+    assert isinstance(statistic.get_platform_profit(), int)
     assert isinstance(statistic.get_transactions_number(), int)
 
 
 def test_statistics_get() -> None:
-    platform_profit = 2.5
+    platform_profit = 3
     transactions_number = 2
 
     statistic = Statistics(transactions_number, platform_profit)
@@ -125,7 +126,7 @@ def test_transaction_statistic_repo_get_statistics_on_empty(
 def test_transaction_statistic_repo_get_statistics(
     repo: TransactionStatisticRepository = TransactionStatisticInMemory(),
 ) -> None:
-    profit = 1.25
+    profit = 2
     transaction_statistic = TransactionStatistic(profit=profit)
 
     repo.create(transaction_statistic)

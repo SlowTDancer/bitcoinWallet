@@ -1,12 +1,13 @@
 from __future__ import annotations
 
+from math import ceil
 from uuid import UUID
 
 from fastapi import APIRouter, Header
 from pydantic import BaseModel
 from starlette.responses import JSONResponse
 
-from constants import ERROR_RESPONSES
+from constants import BITCOIN, ERROR_RESPONSES
 from core.errors import (
     InvalidOwnerError,
     NotEnoughBalanceError,
@@ -100,12 +101,13 @@ def make_transaction(
         )
 
     amount = request.amount
+    satoshi_amount = amount * BITCOIN
 
-    if amount <= 0:
+    if satoshi_amount < 1 or (satoshi_amount != ceil(satoshi_amount)):
         return JSONResponse(
             status_code=413,
             content={
-                "error": {"message": "Transaction amount must be a positive number."}
+                "error": {"message": "Transaction amount must be a positive integer."}
             },
         )
 
@@ -113,14 +115,16 @@ def make_transaction(
         private_key=api_key,
         from_key=request.from_key,
         to_key=request.to_key,
-        amount=amount,
+        amount=int(satoshi_amount),
     )
 
     try:
         transaction_statistic = TransactionStatistic(
             transaction_key=transaction.get_key()
         )
-        transaction_statistic.system_update(wallets, from_wallet, to_wallet, amount)
+        transaction_statistic.system_update(
+            wallets, from_wallet, to_wallet, int(satoshi_amount)
+        )
 
         wallets.add_transaction(transaction)
         transaction_statistics.create(transaction_statistic)
@@ -128,7 +132,7 @@ def make_transaction(
             "transaction": TransactionItemResponse(
                 to_key=transaction.get_to_key(),
                 from_key=transaction.get_from_key(),
-                amount=transaction.get_amount(),
+                amount=amount,
             )
         }
     except SameWalletsError:
@@ -189,7 +193,7 @@ def get_transactions(
             TransactionItemResponse(
                 to_key=transaction.get_to_key(),
                 from_key=transaction.get_from_key(),
-                amount=transaction.get_amount(),
+                amount=transaction.get_amount() / BITCOIN,
             )
             for transaction in transactions
         ]

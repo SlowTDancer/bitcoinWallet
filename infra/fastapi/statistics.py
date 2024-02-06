@@ -6,7 +6,7 @@ from fastapi import APIRouter, Header
 from pydantic import BaseModel
 from starlette.responses import JSONResponse
 
-from constants import ERROR_RESPONSES
+from constants import BITCOIN, ERROR_RESPONSES
 from core.admin_checker import check_admin
 from core.errors import InvalidAdminAPIKeyError
 from infra.fastapi.dependables import TransactionStatisticRepositoryDependable
@@ -47,6 +47,6 @@ def get_transactions(
     return {
         "statistics": StatisticItemResponse(
             transactions_number=statistics.get_transactions_number(),
-            platform_profit=statistics.get_platform_profit(),
+            platform_profit=statistics.get_platform_profit() / BITCOIN,
         )
     }

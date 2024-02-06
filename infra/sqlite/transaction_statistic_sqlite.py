@@ -63,7 +63,7 @@ class TransactionStatisticSqlite(TransactionStatisticRepository):
         )
         result = cursor.fetchone()
         connection.close()
-        return Statistics(int(result[0]), float(result[1]))
+        return Statistics(int(result[0]), int(result[1]))
 
     def clear(self) -> None:
         connection = sqlite3.connect(self.db_path)

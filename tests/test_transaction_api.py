@@ -3,6 +3,7 @@ import uuid
 import pytest
 from fastapi.testclient import TestClient
 
+from constants import BITCOIN
 from runner.setup import init_app
 
 
@@ -26,7 +27,7 @@ def test_make_transaction_success(client: TestClient) -> None:
     transaction_request_data = {
         "from_key": public_key1,
         "to_key": public_key2,
-        "amount": 0.5,
+        "amount": 1,
     }
     response = client.post(
         "/transactions",
@@ -93,7 +94,7 @@ def test_make_transaction_same_wallets(client: TestClient) -> None:
     transaction_request_data = {
         "from_key": public_key,
         "to_key": public_key,
-        "amount": 0.5,
+        "amount": 1,
     }
     response = client.post(
         "/transactions",
@@ -124,7 +125,7 @@ def test_make_transaction_not_enough_balance(client: TestClient) -> None:
     transaction_request_data = {
         "from_key": public_key1,
         "to_key": public_key2,
-        "amount": 100,
+        "amount": 100 * BITCOIN,
     }
     response = client.post(
         "/transactions",
@@ -165,7 +166,7 @@ def test_can_not_make_non_positive_transaction(client: TestClient) -> None:
     assert response.status_code == 413
     assert (
         response.json()["error"]["message"]
-        == "Transaction amount must be a positive number."
+        == "Transaction amount must be a positive integer."
     )
 
 

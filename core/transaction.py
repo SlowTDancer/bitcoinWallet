@@ -11,7 +11,7 @@ class Transaction:
     to_key: UUID = field(default_factory=uuid4)
     private_key: UUID = field(default_factory=uuid4)
     from_key: UUID = field(default_factory=uuid4)
-    amount: float = 0.0
+    amount: int = 1
 
     def get_key(self) -> UUID:
         return self.key
@@ -25,7 +25,7 @@ class Transaction:
     def get_from_key(self) -> UUID:
         return self.from_key
 
-    def get_amount(self) -> float:
+    def get_amount(self) -> int:
         return self.amount
 
 

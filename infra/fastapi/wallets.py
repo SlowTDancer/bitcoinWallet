@@ -7,7 +7,7 @@ from fastapi import APIRouter, Header
 from pydantic import BaseModel
 from starlette.responses import JSONResponse
 
-from constants import ERROR_RESPONSES
+from constants import BITCOIN, ERROR_RESPONSES
 from core.converter import get_btc_to_usd_rate
 from core.errors import (
     ConversionError,
@@ -85,7 +85,7 @@ def create_wallet(
     try:
         users.add_wallet(api_key, wallet.get_public_key())
         wallets.create(wallet)
-        btc_balance = wallet.get_balance()
+        btc_balance = wallet.get_balance() / BITCOIN
         usd_balance = get_btc_to_usd_rate() * btc_balance
         response = WalletItemResponse(
             public_key=wallet.get_public_key(),
@@ -136,7 +136,7 @@ def get_wallet_by_address(
         )
     try:
         wallet = wallets.get_wallet(api_key, address)
-        btc_balance = wallet.get_balance()
+        btc_balance = wallet.get_balance() / BITCOIN
         usd_balance = get_btc_to_usd_rate() * btc_balance
         response = WalletItemResponse(
             public_key=address, btc_balance=btc_balance, usd_balance=usd_balance
@@ -196,7 +196,7 @@ def get_wallet_transactions(
                 TransactionItemResponse(
                     to_key=transaction.get_to_key(),
                     from_key=transaction.get_from_key(),
-                    amount=transaction.get_amount(),
+                    amount=transaction.get_amount() / BITCOIN,
                 )
                 for transaction in wallet_transactions
             ]
