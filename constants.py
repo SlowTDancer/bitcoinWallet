@@ -1,9 +1,10 @@
 from typing import Any
+from uuid import UUID
 
 MAX_WALLETS_PER_USER = 3
-DB_PATH = "main_sqlite.db"
+DB_PATH = "../main_sqlite.db"
 TEST_DB_PATH = "../test_sqlite.db"
-ADMIN_API_KEY = "002aa904-5f6d-4fa0-8bc6-e79094d3b599"
+ADMIN_API_KEY = UUID("002aa904-5f6d-4fa0-8bc6-e79094d3b599")
 TRANSFER_FEE = 0.015
 CONVERTER_URL = "https://blockchain.info/ticker"
 ERROR_RESPONSES: dict[int, Any] = {
@@ -47,6 +48,17 @@ ERROR_RESPONSES: dict[int, Any] = {
                     "error": {
                         "message": "User's with email <email> wallet "
                         "quantity limit is reached."
+                    }
+                }
+            }
+        }
+    },
+    413: {
+        "content": {
+            "application/json": {
+                "example": {
+                    "error": {
+                        "message": "Transaction amount must be a positive number."
                     }
                 }
             }

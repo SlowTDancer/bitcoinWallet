@@ -139,6 +139,36 @@ def test_make_transaction_not_enough_balance(client: TestClient) -> None:
     )
 
 
+def test_can_not_make_non_positive_transaction(client: TestClient) -> None:
+    email = "test@example.com"
+    user_request_data = {"email": email}
+
+    user_response = client.post("/users", json=user_request_data)
+
+    wallet_response1 = client.post("/wallets", headers=user_response.json()["user"])
+    wallet_response2 = client.post("/wallets", headers=user_response.json()["user"])
+
+    public_key1 = wallet_response1.json()["wallet"]["public_key"]
+    public_key2 = wallet_response2.json()["wallet"]["public_key"]
+
+    transaction_request_data = {
+        "from_key": public_key1,
+        "to_key": public_key2,
+        "amount": 0,
+    }
+    response = client.post(
+        "/transactions",
+        json=transaction_request_data,
+        headers=user_response.json()["user"],
+    )
+
+    assert response.status_code == 413
+    assert (
+        response.json()["error"]["message"]
+        == "Transaction amount must be a positive number."
+    )
+
+
 def test_get_transactions_success(client: TestClient) -> None:
     email = "test@example.com"
     user_request_data = {"email": email}

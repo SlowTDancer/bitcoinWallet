@@ -44,6 +44,7 @@ class MakeTransactionRequest(BaseModel):
         404: ERROR_RESPONSES[404],
         405: ERROR_RESPONSES[405],
         409: ERROR_RESPONSES[409],
+        413: ERROR_RESPONSES[413],
         419: ERROR_RESPONSES[419],
         420: ERROR_RESPONSES[420],
     },
@@ -99,6 +100,14 @@ def make_transaction(
         )
 
     amount = request.amount
+
+    if amount <= 0:
+        return JSONResponse(
+            status_code=413,
+            content={
+                "error": {"message": "Transaction amount must be a positive number."}
+            },
+        )
 
     transaction = Transaction(
         private_key=api_key,
