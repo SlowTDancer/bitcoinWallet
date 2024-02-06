@@ -176,7 +176,7 @@ def test_get_wallet_transactions_invalid_owner(client: TestClient) -> None:
 
     wallet_response = client.post("/wallets", headers=user_response1.json()["user"])
 
-    email2 = "testing@example.com"
+    email2 = "test2@example.com"
     request_data2 = {"email": email2}
     user_response2 = client.post("/users", json=request_data2)
 

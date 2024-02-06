@@ -1,6 +1,9 @@
 import uuid
+from typing import Any
+
 import pytest
 from fastapi.testclient import TestClient
+
 from constants import BITCOIN
 from runner.setup import init_app
 
@@ -10,7 +13,7 @@ def client() -> TestClient:
     return TestClient(init_app())
 
 
-def create_user_and_wallets(client: TestClient) -> tuple:
+def create_user_and_wallets(client: TestClient) -> tuple[Any, ...]:
     email = "test@example.com"
     user_request_data = {"email": email}
 

@@ -47,12 +47,16 @@ class UserSqlite(UserRepository):
             "SELECT email FROM users WHERE private_key = ?", (str(private_key),)
         )
         result = cursor.fetchone()
-        if result is None:
-            connection.close()
-            raise UserDoesNotExistError(private_key)
         connection.close()
+
+        if result is None:
+            raise UserDoesNotExistError(private_key)
+
         email = str(result[0])
-        return self._get_by_email(email)
+        user = self._get_by_email(email)
+        if user is None:
+            raise UserDoesNotExistError(private_key)
+        return user
 
     def _get_by_email(self, email: str) -> User | None:
         connection = sqlite3.connect(self.db_path)
